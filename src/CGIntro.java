@@ -165,8 +165,9 @@ public class CGIntro implements GLEventListener {
 				System.exit(0);
 			}
 		}
-	}
-
+	} 
+	
+	
 	public void display(GLAutoDrawable dr) {
 		GL2 gl2 = dr.getGL().getGL2();
 		GLU glu = new GLU();
