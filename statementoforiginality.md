@@ -2,7 +2,7 @@
 
 
 Unless otherwise stated this code is entirely our work. 
-+ member 1 name and uni id
++ Xiran Yan u7167582
 + member 2 name and uni id (delete if not needed)
 + member 3 name and uni id (delete if not needed)
 

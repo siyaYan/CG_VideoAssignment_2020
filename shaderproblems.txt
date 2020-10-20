@@ -1,0 +1,7 @@
+Can't use shader 330\
+Maybe 1/it's writing wrong somewhere 2/my Jogl jar can't support the 330 version,
+Find the newest Jogl jar - not work - OpenGl have different version too
+How to update the openGl version - can't
+Check the openGL version in IDEA is 2.1
+Check the openGL by OPGL viewer is 4.1
+Figure out the reasons?

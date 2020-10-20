@@ -19,8 +19,11 @@ import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.PMVMatrix;
 import com.jogamp.opengl.util.gl2.GLUT;
+import com.jogamp.opengl.util.glsl.ShaderState;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
+
+import static com.jogamp.opengl.GL.GL_VERSION;
 
 public class CGIntro implements GLEventListener {
 
@@ -76,24 +79,24 @@ public class CGIntro implements GLEventListener {
 	public static void main(String[] args) {
 		new CGIntro();
 	}
-
-	static final String vertstr[] = { "#version 330 core\n" + "in vec4 vertex;\n" + "in vec2 texcoord;\n"
-			+ "uniform mat4 mvMat, pMat;\n" + "smooth out vec2 tex_coord;\n" + "void main() {\n"
+	//todo for mac, i can only use the default shader version
+	static final String vertstr[] = { "attribute vec4 vertex;\n" + "attribute vec2 texcoord;\n"
+			+ "uniform mat4 mvMat, pMat;\n" + "varying vec2 tex_coord;\n" + "void main() {\n"
 			+ "    tex_coord = texcoord;\n" + "    gl_Position = (pMat * mvMat) * vertex;\n" + "}\n" };
 
 	static int vlens[] = new int[1];
 	static int flens[] = new int[1];
 
-	static final String fragstr[] = { "#version 130\n" + " uniform sampler2D texture;\n" + "out vec4 vFragColor;\n"
-			+ "smooth in vec2 tex_coord;\n" + "void main() {\n"
-			+ "   vFragColor = texture2D(texture,tex_coord);\n" + "}\n" };
+	static final String fragstr[] = {  " uniform sampler2D texture;\n"
+			+ " varying vec2 tex_coord;\n" + "void main() {\n"
+			+ "   gl_FragColor = texture2D(texture,tex_coord);\n" + "}\n" };
 
 	public void init(GLAutoDrawable dr) { // set up openGL for 2D drawing
 		GL2 gl2 = dr.getGL().getGL2();
 		GLU glu = new GLU();
 		GLUT glut = new GLUT();
-
-		
+		System.out.println("GL_VERSION : " + gl2.glGetString(GL2.GL_VERSION));
+		System.out.println("GL_SHADING_LANGUAGE_VERSION : " + gl2.glGetString(GL2.GL_SHADING_LANGUAGE_VERSION));
 		matrix = new PMVMatrix();
 		matrix.glMatrixMode(GL2.GL_PROJECTION);
 		matrix.glFrustumf(-2.0f, 2.0f, -2.0f, 2.0f, 1.0f, 10.0f);
