@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Random;
 
 import javax.swing.JFrame;
 
@@ -57,8 +58,31 @@ public class CGIntro implements GLEventListener {
 	int vertexbuffer[];
 	int colorbuffer[];
 	int texbuffer[];
+	int[] rotate={0,0,0};
+	int[] pos ={0,0,0};
+	int[] direct={0,0,0};
+	boolean rote=false;
 
 	public CGIntro() {
+		Random rand = new Random();
+		//-1,0,1
+		for (int index = 0; index < 3; index++) {
+			/*rotate[index]=rand.nextInt(1)%(3)-1;
+			pos[index]=rand.nextInt(1)%(3)-1;
+			direct[index]=rand.nextInt(1)%(3)-1;*/
+			rotate[index]=(int)(2*Math.random());
+			pos[index]=(int)(2*Math.random());
+			direct[index]=(int)(2*Math.random());
+			System.out.println(rotate[index]+","+pos[index]+","+direct[index]);
+		};
+		for(int i=0;i<3;i++){
+			if (rotate[i] == 1) {
+				rote=true;
+			}
+		}
+		if (!rote) {
+			rotate[0]=1;
+		}
 		jf = new JFrame("CG Intro");
 		profile = GLProfile.getDefault();
 		caps = new GLCapabilities(profile);
@@ -87,9 +111,13 @@ public class CGIntro implements GLEventListener {
 	static int vlens[] = new int[1];
 	static int flens[] = new int[1];
 
-	static final String fragstr[] = {  " uniform sampler2D texture;\n"
-			+ " varying vec2 tex_coord;\n" + "void main() {\n"
-			+ "   gl_FragColor = texture2D(texture,tex_coord);\n" + "}\n" };
+	static final String fragstr[] = {
+			" uniform sampler2D texture;\n"
+			+ "varying vec2 tex_coord;\n" + "void main() {\n"
+			/*+ "gl_FragColor = vec4(0.5, 0.0, 0.0, 1.0);  \n"*/
+			+ "gl_FragColor = texture2D(texture,tex_coord);\n"
+			+ "}\n"
+	};
 
 	public void init(GLAutoDrawable dr) { // set up openGL for 2D drawing
 		GL2 gl2 = dr.getGL().getGL2();
@@ -101,7 +129,7 @@ public class CGIntro implements GLEventListener {
 		matrix.glMatrixMode(GL2.GL_PROJECTION);
 		matrix.glFrustumf(-2.0f, 2.0f, -2.0f, 2.0f, 1.0f, 10.0f);
 		matrix.glMatrixMode(GL2.GL_MODELVIEW);
-		matrix.gluLookAt(0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+		matrix.gluLookAt(0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f);
 
 		// setup and load the vertex and fragment shader programs
 		shaderprogram = gl2.glCreateProgram();
@@ -134,23 +162,51 @@ public class CGIntro implements GLEventListener {
 		}
 
 		// load the vertex and texture array
-		float[] triangleArray = { 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-				0.0f, 0.0f, 1.0f, 0.0f };
+		float[] polygonArray = {
+				-1.0f, -1.0f, 0.0f,
+				1.0f, -1.0f, 0.0f,
+				1.0f, -1.0f, 0.0f,
+				1.0f, 1.0f, 0.0f,
+				1.0f, 1.0f, 0.0f,
+				-1.0f, 1.0f, 0.0f,
+				-1.0f, 1.0f, 0.0f,
+				-1.0f, -1.0f, 0.0f,
+		};
 
-		FloatBuffer triangleVertexBuffer = Buffers.newDirectFloatBuffer(triangleArray);
-		float[] texArray = { 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f };
+		FloatBuffer polygonVertexBuffer = Buffers.newDirectFloatBuffer(polygonArray);
+		float[] texArray = {
+				0.0f, 0.0f,
+				1.0f, 0.0f,
+				1.0f, 0.0f,
+				1.0f, 1.0f,
+				1.0f, 1.0f,
+				0.0f, 1.0f,
+				0.0f, 1.0f,
+				0.0f, 0.0f,};
 		FloatBuffer texCoordBuffer = Buffers.newDirectFloatBuffer(texArray);
+
+		float[] colorArray = {
+				0.0f, 0.0f, 1.0f,
+				0.0f, 0.0f, 1.0f,
+				1.0f, 0.0f, 1.0f,
+				1.0f, 0.0f, 1.0f };
+		FloatBuffer colorBuffer = Buffers.newDirectFloatBuffer(colorArray);
 
 		vertexbuffer = new int[1];
 		gl2.glGenBuffers(1, vertexbuffer, 0);
 		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, vertexbuffer[0]);
-		gl2.glBufferData(GL2.GL_ARRAY_BUFFER, (long) triangleArray.length * 4, triangleVertexBuffer,
+		gl2.glBufferData(GL2.GL_ARRAY_BUFFER, (long) polygonArray.length * 4, polygonVertexBuffer,
 				GL2.GL_STATIC_DRAW);
 
 		texbuffer = new int[1];
 		gl2.glGenBuffers(1, texbuffer, 0);
 		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, texbuffer[0]);
 		gl2.glBufferData(GL2.GL_ARRAY_BUFFER, (long) texArray.length * 4, texCoordBuffer, GL2.GL_STATIC_DRAW);
+
+		colorbuffer =new int[1];
+		gl2.glGenBuffers(1, colorbuffer, 0);
+		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, colorbuffer[0]);
+		gl2.glBufferData(GL2.GL_ARRAY_BUFFER, (long) colorArray.length * 4, texCoordBuffer, GL2.GL_STATIC_DRAW);
 	}
 
 	private void checkok(GL2 gl2, int program, int type) {
@@ -168,16 +224,34 @@ public class CGIntro implements GLEventListener {
 				System.exit(0);
 			}
 		}
-	} 
-	
+	}
+
+	/**
+	 * Random translation/rotation algorithms:
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 *
+	 */
+	public void transAndRotate(GL2 gl) {
+		float scale = 1;
+		float speed = time / introTime;
+
+		//top
+		matrix.glTranslatef(10*direct[0], -10.0f, 0.0f);
+		matrix.glTranslatef(-10, 10*speed, 0.0f);
+		matrix.glRotatef(180.0f * (10*speed), 1.0f, 0.0f, 0.0f);
+		
+		if (time < introTime) {
+			System.out.println(time);
+			speed=time;
+			time += 1.0f / fps;
+		}
+	}
 	
 	public void display(GLAutoDrawable dr) {
 		GL2 gl2 = dr.getGL().getGL2();
 		GLU glu = new GLU();
 		GLUT glut = new GLUT();
-
-		float scale = 2.2f;
-		float proportiondone = time / introTime;
 
 		gl2.glUseProgram(shaderprogram);
 		gl2.glClear(GL.GL_COLOR_BUFFER_BIT);
@@ -185,10 +259,7 @@ public class CGIntro implements GLEventListener {
 		// set up the matrix transformation - the idea was to create the sign to move up
 		// and rotate to front and center at the end
 		matrix.glPushMatrix();
-		matrix.glTranslatef(0.0f, -10.0f * (1.0f - proportiondone), 0.0f);
-		matrix.glScalef(scale * cgtextureAspect, scale, scale);
-		matrix.glTranslatef(-0.5f, 0.0f, 0.0f);
-		matrix.glRotatef(-160.0f * (1.0f - proportiondone), 1.0f, 0.0f, 0.0f);
+		transAndRotate(gl2);
 
 		// load the uniforms
 		int mvMatrixID = gl2.glGetUniformLocation(shaderprogram, "mvMat");
@@ -214,7 +285,8 @@ public class CGIntro implements GLEventListener {
 		cgtexture.bind(gl2);
 
 		// do the drawing
-		gl2.glDrawArrays(GL2.GL_TRIANGLES, 0, 6);
+		gl2.glDrawArrays(GL2.GL_POLYGON,0,6);
+		//gl2.glDrawArrays(GL2.GL_TRIANGLES, 0, 6);
 
 		gl2.glDisableVertexAttribArray(posVAttrib);
 		gl2.glDisableVertexAttribArray(texAttrib);
@@ -222,9 +294,6 @@ public class CGIntro implements GLEventListener {
 		matrix.glPopMatrix();
 
 		gl2.glFlush();
-
-		if (time < introTime)
-			time += 1.0f / fps;
 	}
 
 	public void dispose(GLAutoDrawable glautodrawable) {
