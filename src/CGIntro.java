@@ -58,63 +58,56 @@ public class CGIntro implements GLEventListener {
 	int vertexbuffer[];
 	int colorbuffer[];
 	int texbuffer[];
-	int[] rotate={0,0,0};
-	int[] startpos ={0};
-	int[] direct={0,0,0};
+	int[] rotate={0,0,0};//rotate true/false for x,y,z
+	//we will have more than one objects for startpos and direction
+	int[] startpos ={0};//from -10 to 10
+	int[] dicrect = {0};//-1 or 1(righe or left)
 	boolean rote=false;
-	float speedDicrect;
+
 
 	public void Random() {
 		Random rand = new Random();
-		//-1,0,1
+		//ture or false for rotate x,y,z
 		for (int index = 0; index < 3; index++) {
-			rotate[index]=(int)(2*Math.random());
-			//rotate[index]=rand.nextInt(3)-1;
-			//direct[index]=rand.nextInt(3)-1;
-			/*
-			pos[index]=(int)(2*Math.random());
-			direct[index]=(int)(2*Math.random());*/
-			System.out.println(rotate[index]+","+direct[index]);
+			rotate[index]=(int)(2*Math.random());//random 0,1
+			System.out.println(rotate[index]+",");
 		};
-		speedDicrect=direct[0];
-		if (direct[0] == 0) {
-			while (speedDicrect == 0) {
-				speedDicrect=rand.nextInt(3)-1;
-			}
+		//random speedDicrect can only be 1 or -1
+		while (dicrect[0] == 0) {
+			dicrect[0]=rand.nextInt(3)-1;//random -1,0,1
 		}
+		System.out.println(dicrect[0]);
+		//random from -10 to 10,note:-10 is the rightmost
 		startpos[0]=rand.nextInt(21)-10;
 		System.out.println(startpos[0]);
-		//right is neg,top is neg
+		//make the falling more reasonale
+		//if the start point is too right,make is falling to left
 		if (startpos[0] <= -7) {
-			speedDicrect=1;
+			dicrect[0]=1;
 		}
+		//converse
 		if (startpos[0] >= 7) {
-			speedDicrect=-1;
+			dicrect[0]=-1;
 		}
-		for(int i=0;i<3;i++){
-			if (rotate[i] == 1) {
-				rote=true;
-			}
-		}
-		if (!rote) {
-			rotate[0]=1;
-		}
-		System.out.println(speedDicrect);
+		System.out.println(dicrect[0]);
 	}
 	/**
 	 * Random translation/rotation algorithms:
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
-	 *
+	 * note:right is negative&top is negative
 	 */
 	public void transAndRotate(GL2 gl) {
 		float scale = 1;
+		//falling down speed,rotate speed,goto right or left speed
 		float speedDown = 20*(time / introTime);
 		float speedRotate = 10*(time / introTime);
-		float speedLeft = 8*(time / introTime);
-		matrix.glTranslatef(startpos[0]+(speedLeft*speedDicrect), (-10.0f)+(speedDown), 0.0f);
+		float speedLeftOrRight = 8*(time / introTime);
+		//todo have issue when both x and y are rotate, seems like change the shape of the object!
+		matrix.glTranslatef(startpos[0]+(speedLeftOrRight*dicrect[0]), (-10.0f)+(speedDown), 0.0f);
 		matrix.glRotatef(180.0f * (speedRotate), 1.0f*rotate[0], 1.0f*rotate[1], 1.0f*rotate[2]);
 
+		//time change from 0.0 to 9.95, every step increase 0.05
 		if (time < introTime) {
 			System.out.println(time);
 			time += 1.0f / fps;
