@@ -59,22 +59,38 @@ public class CGIntro implements GLEventListener {
 	int colorbuffer[];
 	int texbuffer[];
 	int[] rotate={0,0,0};
-	int[] pos ={0,0,0};
+	int[] startpos ={0};
 	int[] direct={0,0,0};
 	boolean rote=false;
+	float speedDicrect;
 
-	public CGIntro() {
+	public void Random() {
 		Random rand = new Random();
 		//-1,0,1
 		for (int index = 0; index < 3; index++) {
-			/*rotate[index]=rand.nextInt(1)%(3)-1;
-			pos[index]=rand.nextInt(1)%(3)-1;
-			direct[index]=rand.nextInt(1)%(3)-1;*/
 			rotate[index]=(int)(2*Math.random());
+			//rotate[index]=rand.nextInt(3)-1;
+			//direct[index]=rand.nextInt(3)-1;
+			/*
 			pos[index]=(int)(2*Math.random());
-			direct[index]=(int)(2*Math.random());
-			System.out.println(rotate[index]+","+pos[index]+","+direct[index]);
+			direct[index]=(int)(2*Math.random());*/
+			System.out.println(rotate[index]+","+direct[index]);
 		};
+		speedDicrect=direct[0];
+		if (direct[0] == 0) {
+			while (speedDicrect == 0) {
+				speedDicrect=rand.nextInt(3)-1;
+			}
+		}
+		startpos[0]=rand.nextInt(21)-10;
+		System.out.println(startpos[0]);
+		//right is neg,top is neg
+		if (startpos[0] <= -7) {
+			speedDicrect=1;
+		}
+		if (startpos[0] >= 7) {
+			speedDicrect=-1;
+		}
 		for(int i=0;i<3;i++){
 			if (rotate[i] == 1) {
 				rote=true;
@@ -83,6 +99,30 @@ public class CGIntro implements GLEventListener {
 		if (!rote) {
 			rotate[0]=1;
 		}
+		System.out.println(speedDicrect);
+	}
+	/**
+	 * Random translation/rotation algorithms:
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 *
+	 */
+	public void transAndRotate(GL2 gl) {
+		float scale = 1;
+		float speedDown = 20*(time / introTime);
+		float speedRotate = 10*(time / introTime);
+		float speedLeft = 8*(time / introTime);
+		matrix.glTranslatef(startpos[0]+(speedLeft*speedDicrect), (-10.0f)+(speedDown), 0.0f);
+		matrix.glRotatef(180.0f * (speedRotate), 1.0f*rotate[0], 1.0f*rotate[1], 1.0f*rotate[2]);
+
+		if (time < introTime) {
+			System.out.println(time);
+			time += 1.0f / fps;
+		}
+	}
+
+	public CGIntro() {
+		Random();
 		jf = new JFrame("CG Intro");
 		profile = GLProfile.getDefault();
 		caps = new GLCapabilities(profile);
@@ -223,28 +263,6 @@ public class CGIntro implements GLEventListener {
 				jf.dispose();
 				System.exit(0);
 			}
-		}
-	}
-
-	/**
-	 * Random translation/rotation algorithms:
-	 * @auther: Xiran Yan(Siya)
-	 * @uid: u7167582
-	 *
-	 */
-	public void transAndRotate(GL2 gl) {
-		float scale = 1;
-		float speed = time / introTime;
-
-		//top
-		matrix.glTranslatef(10*direct[0], -10.0f, 0.0f);
-		matrix.glTranslatef(-10, 10*speed, 0.0f);
-		matrix.glRotatef(180.0f * (10*speed), 1.0f, 0.0f, 0.0f);
-		
-		if (time < introTime) {
-			System.out.println(time);
-			speed=time;
-			time += 1.0f / fps;
 		}
 	}
 	
