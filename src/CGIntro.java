@@ -1,20 +1,19 @@
-import com.jogamp.common.nio.Buffers;
+
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.FPSAnimator;
-import com.jogamp.opengl.util.PMVMatrix;
 import com.jogamp.opengl.util.gl2.GLUT;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
+
 
 import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
+import java.nio.*;
 import java.util.Random;
 
 import static javax.sound.sampled.AudioSystem.getAudioInputStream;
@@ -32,18 +31,13 @@ public class CGIntro implements GLEventListener {
 	GLProfile profile;
 	GLCapabilities caps;
 	GLJPanel gljpanel;
-	Dimension dim = new Dimension(800, 600);
+	Dimension dim = new Dimension(800, 800);
 	FPSAnimator animator;
 	float time;
 	static int fps = 20;
-	static float introTime = 10.0f; // seconds
+	static float introTime = 20.0f; // seconds
 	Texture cgtexture;
 	float cgtextureAspect;
-	PMVMatrix matrix;
-	int shaderprogram, vertexshader, fragshader;
-	int vertexbuffer[];
-	int colorbuffer[];
-	int texbuffer[];
 
 	//we will have more than one objects for the following natures
 	int[] rotate= new int[30];//rotate true/false for x,y,z
@@ -52,21 +46,7 @@ public class CGIntro implements GLEventListener {
 	int[] speed=new int[10];//-1,0,1(3 types)
 	boolean rote=false;
 
-	//todo for mac, i can only use the default shader version
-	static final String vertstr[] = { "attribute vec4 vertex;\n" + "attribute vec2 texcoord;\n"
-			+ "uniform mat4 mvMat, pMat;\n" + "varying vec2 tex_coord;\n" + "void main() {\n"
-			+ "    tex_coord = texcoord;\n" + "    gl_Position = (pMat * mvMat) * vertex;\n" + "}\n" };
-
-	static int vlens[] = new int[1];
-	static int flens[] = new int[1];
-
-	static final String fragstr[] = {
-			" uniform sampler2D texture;\n"
-					+ "varying vec2 tex_coord;\n" + "void main() {\n"
-					/*+ "gl_FragColor = vec4(0.5, 0.0, 0.0, 1.0);  \n"*/
-					+ "gl_FragColor = texture2D(texture,tex_coord);\n"
-					+ "}\n"
-	};
+	float lightpos[] = { 5f, 10f, 10f, 1.0f };
 
 	//play background
 	public void play(String filePath) throws IOException, UnsupportedAudioFileException {
@@ -93,7 +73,6 @@ public class CGIntro implements GLEventListener {
 	}
 
 	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
-		//File file = new File("src/background.wav");
 		new CGIntro();
 	}
 
@@ -138,11 +117,11 @@ public class CGIntro implements GLEventListener {
 		}
 		//make the falling more reasonale
 		//if the start point is too right,make is falling to left
-		if (startpos[num] <= -7) {
+		if (startpos[num] <= -8) {
 			direct[num]=1;
 		}
 		//converse
-		if (startpos[num] >= 7) {
+		if (startpos[num] >= 8) {
 			direct[num]=-1;
 		}
 		System.out.println("direct:"+direct[num]);
@@ -158,7 +137,7 @@ public class CGIntro implements GLEventListener {
 	 * note:right is negative&top is negative
 	 */
 
-	public void transAndRotate(int num) {
+/*	public void transAndRotate(int num) {
 		float scale = 1;
 		//falling down speed
 		float speedDown = (speed[num]*10+20)*(time / introTime);
@@ -171,7 +150,28 @@ public class CGIntro implements GLEventListener {
 
 		//time change from 0.0 to 9.95, every step increase 0.05
 		if (time < introTime) {
-			System.out.println(time);
+			//System.out.println(time);
+			time += 1.0f / fps;
+		}
+	}*/
+
+	public void transAndRotate(GL2 gl2,GLU glu, GLUT glut,int num) {
+		float scale = 1;
+		//falling down speed
+		float speedDown = (speed[num]*10+20)*(time / introTime);
+		//speed for rotate and to left or right is default
+		float speedRotate = 10*(time / introTime);
+		float speedLeftOrRight = 8*(time / introTime);
+
+		gl2.glPushMatrix();
+		gl2.glTranslatef(startpos[num]+(speedLeftOrRight*direct[num]), (10.0f)-(speedDown), 0.0f);
+		gl2.glRotatef(180.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
+		drawSphere(gl2,glu,glut);
+		gl2.glPopMatrix();
+
+		//time change from 0.0 to 9.95, every step increase 0.05
+		if (time < introTime) {
+			//System.out.println(time);
 			time += 1.0f / fps;
 		}
 	}
@@ -196,97 +196,90 @@ public class CGIntro implements GLEventListener {
 		animator = new FPSAnimator(gljpanel, fps);
 		time = 0.0f;
 		animator.start();
-		play("src/background.wav");
+		//play("src/background.wav");
 	}
 
 	public void init(GLAutoDrawable dr) { // set up openGL for 2D drawing
 		GL2 gl2 = dr.getGL().getGL2();
 		GLU glu = new GLU();
 		GLUT glut = new GLUT();
-		System.out.println("GL_VERSION : " + gl2.glGetString(GL2.GL_VERSION));
-		System.out.println("GL_SHADING_LANGUAGE_VERSION : " + gl2.glGetString(GL2.GL_SHADING_LANGUAGE_VERSION));
-		matrix = new PMVMatrix();
-		matrix.glMatrixMode(GL2.GL_PROJECTION);
-		matrix.glFrustumf(-2.0f, 2.0f, -2.0f, 2.0f, 1.0f, 10.0f);
-		matrix.glMatrixMode(GL2.GL_MODELVIEW);
-		matrix.gluLookAt(0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+		gl2.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+		gl2.glEnable(GL2.GL_DEPTH_TEST);
 
-		// setup and load the vertex and fragment shader programs
-		shaderprogram = gl2.glCreateProgram();
-		vertexshader = gl2.glCreateShader(GL2.GL_VERTEX_SHADER);
-		vlens[0] = vertstr[0].length();
-		gl2.glShaderSource(vertexshader, 1, vertstr, vlens, 0);
-		gl2.glCompileShader(vertexshader);
-		checkok(gl2, vertexshader, GL2.GL_COMPILE_STATUS);
-		gl2.glAttachShader(shaderprogram, vertexshader);
-		fragshader = gl2.glCreateShader(GL2.GL_FRAGMENT_SHADER);
-		flens[0] = fragstr[0].length();
-		gl2.glShaderSource(fragshader, 1, fragstr, flens, 0);
-		gl2.glCompileShader(fragshader);
-		checkok(gl2, fragshader, GL2.GL_COMPILE_STATUS);
-		gl2.glAttachShader(shaderprogram, fragshader);
-		gl2.glLinkProgram(shaderprogram);
-		checkok(gl2, shaderprogram, GL2.GL_LINK_STATUS);
-		gl2.glValidateProgram(shaderprogram);
-		checkok(gl2, shaderprogram, GL2.GL_VALIDATE_STATUS);
-		gl2.glUseProgram(shaderprogram);
+		gl2.glMatrixMode(GL2.GL_PROJECTION);
+		gl2.glLoadIdentity();
 
-		gl2.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glu.gluPerspective(60.0, 1.0, 1.0, 50.0);
+
+		gl2.glMatrixMode(GL2.GL_MODELVIEW);
+		gl2.glLoadIdentity();
+		glu.gluLookAt(0.0, 2, 20.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
+		gl2.glEnable(GL2.GL_LIGHTING);
+
+		gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, new float[]{ 1f, 1f,1f, 1.0f }, 0);
+		gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, new float[]{0,0,0}, 0);
+		gl2.glEnable(GL2.GL_LIGHT0);
+		gl2.glLightfv(GL2.GL_LIGHT1, GL2.GL_AMBIENT, new float[]{ 0.3f, 0.3f,0.3f, 1.0f }, 0);
+		gl2.glLightfv(GL2.GL_LIGHT1, GL2.GL_DIFFUSE, new float[]{ 0.7f, 0.7f, 0.7f, 1.0f }, 0);
+		gl2.glLightfv(GL2.GL_LIGHT1,GL2.GL_SPECULAR, new float[]{ 0.5f, 0.5f, 0.5f, 1.0f },0);
+		gl2.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION, lightpos, 0);
+		gl2.glEnable(GL2.GL_LIGHT1);
 
 		try {
-			cgtexture = TextureIO.newTexture(new File("images/compgraphicslogo.png"), true);
+			cgtexture = TextureIO.newTexture(new File("src/images/background3.jpg"), true);
 			cgtexture.enable(gl2);
-			cgtextureAspect = ((float) cgtexture.getImageWidth()) / cgtexture.getImageHeight();
+			//cgtextureAspect = ((float) cgtexture.getImageWidth()) / cgtexture.getImageHeight();
 		} catch (GLException | IOException e) {
 			e.printStackTrace();
 		}
 
-		// load the vertex and texture array
-		float[] polygonArray = {
-				-1.0f, -1.0f, 0.0f,
-				1.0f, -1.0f, 0.0f,
-				1.0f, -1.0f, 0.0f,
-				1.0f, 1.0f, 0.0f,
-				1.0f, 1.0f, 0.0f,
-				-1.0f, 1.0f, 0.0f,
-				-1.0f, 1.0f, 0.0f,
-				-1.0f, -1.0f, 0.0f,
-		};
+	}
 
-		FloatBuffer polygonVertexBuffer = Buffers.newDirectFloatBuffer(polygonArray);
-		float[] texArray = {
-				0.0f, 0.0f,
-				1.0f, 0.0f,
-				1.0f, 0.0f,
-				1.0f, 1.0f,
-				1.0f, 1.0f,
-				0.0f, 1.0f,
-				0.0f, 1.0f,
-				0.0f, 0.0f,};
-		FloatBuffer texCoordBuffer = Buffers.newDirectFloatBuffer(texArray);
+	// draw a simple sphere
+	public void drawSphere(GL2 gl2, GLU glu, GLUT glut) {
+		gl2.glPushMatrix();
+		/*gl2.glTexGeni(GL2.GL_S, GL2.GL_TEXTURE_GEN_MODE,GL2.GL_OBJECT_LINEAR);
+		gl2.glTexGeni(GL2.GL_T, GL2.GL_TEXTURE_GEN_MODE,GL2.GL_OBJECT_LINEAR);
+		gl2.glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP);
+		gl2.glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP);
+		gl2.glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP);
+		gl2.glEnable(GL2.GL_TEXTURE_2D);
+		gl2.glEnable(GL2.GL_TEXTURE_GEN_S);
+		gl2.glEnable(GL2.GL_TEXTURE_GEN_T);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);*/
+		gl2.glColor4f(1.0f, 1f, 1f, 1f);
+		glut.glutSolidSphere( 0.5, 50, 50);
+		gl2.glPopMatrix();
+	}
 
-		float[] colorArray = {
-				0.0f, 0.0f, 1.0f,
-				0.0f, 0.0f, 1.0f,
-				1.0f, 0.0f, 1.0f,
-				1.0f, 0.0f, 1.0f };
-		FloatBuffer colorBuffer = Buffers.newDirectFloatBuffer(colorArray);
+	public void drawBackground(GL2 gl2, GLU glu, GLUT glut) {
+		gl2.glPushMatrix();
+		/*gl2.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
+		gl2.glEnable(GL2.GL_LIGHTING);
 
-		vertexbuffer = new int[1];
-		gl2.glGenBuffers(1, vertexbuffer, 0);
-		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, vertexbuffer[0]);
-		gl2.glBufferData(GL2.GL_ARRAY_BUFFER, (long) polygonArray.length * 4, polygonVertexBuffer,
-				GL2.GL_STATIC_DRAW);
-
-		texbuffer = new int[1];
-		gl2.glGenBuffers(1, texbuffer, 0);
-		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, texbuffer[0]);
-		gl2.glBufferData(GL2.GL_ARRAY_BUFFER, (long) texArray.length * 4, texCoordBuffer, GL2.GL_STATIC_DRAW);
-
-		colorbuffer =new int[1];
-		gl2.glGenBuffers(1, colorbuffer, 0);
-		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, colorbuffer[0]);
-		gl2.glBufferData(GL2.GL_ARRAY_BUFFER, (long) colorArray.length * 4, texCoordBuffer, GL2.GL_STATIC_DRAW);
+		// draw the floor
+		float dff[] = { 0.7f, 0.3f, 1.0f, 0.0f };
+		gl2.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE,
+				dff, 0);*/
+		gl2.glPushMatrix();
+		cgtexture.bind(gl2);
+		gl2.glEnable(GL2.GL_TEXTURE_2D);
+		gl2.glBegin(GL2.GL_POLYGON);
+		gl2.glVertex3d(-20.0, -20.0, -10.0);
+		gl2.glTexCoord3d(0.0,0.0,0.0);
+		gl2.glVertex3d(-20.0, 20.0, -10.0);
+		gl2.glTexCoord3d(1.0,0.0,0.0);
+		gl2.glVertex3d(20.0, 20.0, -10.0);
+		gl2.glTexCoord3d(1.0,1.0,0.0);
+		gl2.glVertex3d(20.0, -20.0, -10.0);
+		gl2.glTexCoord3d(0.0,1.0,0.0);
+		gl2.glEnd();
+		gl2.glDisable(GL2.GL_TEXTURE_2D);
+		gl2.glPopMatrix();
 	}
 
 	public void display(GLAutoDrawable dr) {
@@ -294,65 +287,43 @@ public class CGIntro implements GLEventListener {
 		GLU glu = new GLU();
 		GLUT glut = new GLUT();
 
-		gl2.glUseProgram(shaderprogram);
-		gl2.glClear(GL.GL_COLOR_BUFFER_BIT);
+		gl2.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
+		// draw the cup normally
+		gl2.glPushMatrix();
+		drawBackground(gl2,glu,glut);
+		transAndRotate(gl2,glu,glut,0);
+		gl2.glPopMatrix();
+		// draw the shadow
+/*		gl2.glDisable(GL2.GL_LIGHTING);
+		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
+		gl2.glPolygonOffset(-1.0f, -1.0f);
+
+		float ground[] = { 0.0f, -3.0f, 0.0f };
+		float groundnormal[] = { 0.0f, -1.0f, 0.0f };*/
+
+		//gl2.glPushMatrix();
+		//gl2.glColor3d(0.0, 0.0, 0.0);
+		//projectShadow(gl2, ground, groundnormal, lightpos);
+		//drawcup(gl2, glu, glut, angle);
+
+
+		//gl2.glUseProgram(shaderprogram);
+		/*gl2.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+		gl2.glEnable(GL2.GL_LIGHTING);
+		float df[] = { 0.3f, 0.3f, 1.0f, 0.0f };*/
 		// set up the matrix transformation - the idea was to create the sign to move up
 		// and rotate to front and center at the end
-		matrix.glPushMatrix();
-		System.out.println("in");
-		transAndRotate(0);
+		//matrix.glPushMatrix();
+		//System.out.println("in");
+		//transAndRotate(0);
+		if (time < introTime) {
+			//System.out.println(time);
+			time += 1.0f / fps;
+		}
 
-		// load the uniforms
-		int mvMatrixID = gl2.glGetUniformLocation(shaderprogram, "mvMat");
-		gl2.glUniformMatrix4fv(mvMatrixID, 1, false, matrix.glGetMvMatrixf());
-
-		int pMatrixID = gl2.glGetUniformLocation(shaderprogram, "pMat");
-		gl2.glUniformMatrix4fv(pMatrixID, 1, false, matrix.glGetPMatrixf());
-
-		// set the buffers for drawing
-		int posVAttrib = gl2.glGetAttribLocation(shaderprogram, "vertex");
-		gl2.glEnableVertexAttribArray(posVAttrib);
-		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, vertexbuffer[0]);
-		gl2.glVertexAttribPointer(posVAttrib, 3, GL2.GL_FLOAT, false, 0, 0);
-
-		int texAttrib = gl2.glGetAttribLocation(shaderprogram, "texcoord");
-		gl2.glEnableVertexAttribArray(texAttrib);
-		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, texbuffer[0]);
-		gl2.glVertexAttribPointer(texAttrib, 2, GL2.GL_FLOAT, false, 0, 0);
-
-
-		gl2.glUniform1i(gl2.glGetUniformLocation(shaderprogram, "texture"), 0);
-		gl2.glActiveTexture(GL2.GL_TEXTURE0);
-		cgtexture.bind(gl2);
-
-		// do the drawing
-		gl2.glDrawArrays(GL2.GL_POLYGON,0,6);
-		//gl2.glDrawArrays(GL2.GL_TRIANGLES, 0, 6);
-
-		gl2.glDisableVertexAttribArray(posVAttrib);
-		gl2.glDisableVertexAttribArray(texAttrib);
-
-		matrix.glPopMatrix();
 
 		gl2.glFlush();
-	}
-
-	private void checkok(GL2 gl2, int program, int type) {
-		IntBuffer intBuffer = IntBuffer.allocate(1);
-		gl2.glGetProgramiv(program, type, intBuffer);
-		if (intBuffer.get(0) != GL.GL_TRUE) {
-			int[] len = new int[1];
-			gl2.glGetProgramiv(program, GL2.GL_INFO_LOG_LENGTH, len, 0);
-			if (len[0] != 0) {
-				byte[] errormessage = new byte[len[0]];
-				gl2.glGetProgramInfoLog(program, len[0], len, 0, errormessage, 0);
-				System.err.println("problem\n" + new String(errormessage));
-				gljpanel.destroy();
-				jf.dispose();
-				System.exit(0);
-			}
-		}
 	}
 
 	public void dispose(GLAutoDrawable glautodrawable) {
