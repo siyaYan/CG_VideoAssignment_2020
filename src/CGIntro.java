@@ -35,7 +35,7 @@ public class CGIntro implements GLEventListener {
 	FPSAnimator animator;
 	float time;
 	static int fps = 20;
-	static float introTime = 20.0f; // seconds
+	static float introTime = 50.0f; // seconds
 	Texture cgtexture;
 	float cgtextureAspect;
 
@@ -44,6 +44,7 @@ public class CGIntro implements GLEventListener {
 	int[] startpos=new int[10];//from -10 to 10
 	int[] direct=new int[10];//-1 or 1(righe or left)
 	int[] speed=new int[10];//-1,0,1(3 types)
+	int[] starttime=new int[10];//0-10(10 types)
 	boolean rote=false;
 
 	float lightpos[] = { 5f, 10f, 10f, 1.0f };
@@ -127,7 +128,10 @@ public class CGIntro implements GLEventListener {
 		System.out.println("direct:"+direct[num]);
 		// 3 types of speed
 		speed[num]=rand.nextInt(3)-1;//random -1,0,1
-		System.out.println("speed:"+speed[num]+"\n");
+		System.out.println("speed:"+speed[num]);
+		//start time from 0-9
+		starttime[num]=rand.nextInt(10);//random 1,0,-1
+		System.out.println("startTime:"+starttime[num]+"\n");
 	}
 
 	/**
@@ -158,13 +162,17 @@ public class CGIntro implements GLEventListener {
 	public void transAndRotate(GL2 gl2,GLU glu, GLUT glut,int num) {
 		float scale = 1;
 		//falling down speed
-		float speedDown = (speed[num]*10+20)*(time / introTime);
+		float speedDown = (speed[num]*10+20)*(time / introTime)-starttime[num];
 		//speed for rotate and to left or right is default
 		float speedRotate = 10*(time / introTime);
 		float speedLeftOrRight = 8*(time / introTime);
 
 		gl2.glPushMatrix();
-		gl2.glTranslatef(startpos[num]+(speedLeftOrRight*direct[num]), (10.0f)-(speedDown), 0.0f);
+		if (speedDown < 0) {
+			gl2.glTranslatef(startpos[num] + (speedLeftOrRight * direct[num]), (10.0f) , 0.0f);
+		} else {
+			gl2.glTranslatef(startpos[num]+(speedLeftOrRight*direct[num]), (10.0f)-(speedDown), 0.0f);
+		}
 		gl2.glRotatef(180.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
 		drawSphere(gl2,glu,glut);
 		gl2.glPopMatrix();
@@ -177,10 +185,10 @@ public class CGIntro implements GLEventListener {
 	}
 
 	public CGIntro() throws IOException, UnsupportedAudioFileException {
-		/*for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 10; i++) {
 			Random(i);
-		}*/
-		Random(0);
+		}
+		//Random(0);
 		jf = new JFrame("CG Intro");
 		profile = GLProfile.getDefault();
 		caps = new GLCapabilities(profile);
@@ -196,7 +204,7 @@ public class CGIntro implements GLEventListener {
 		animator = new FPSAnimator(gljpanel, fps);
 		time = 0.0f;
 		animator.start();
-		//play("src/background.wav");
+		play("src/background.wav");
 	}
 
 	public void init(GLAutoDrawable dr) { // set up openGL for 2D drawing
@@ -213,7 +221,7 @@ public class CGIntro implements GLEventListener {
 
 		gl2.glMatrixMode(GL2.GL_MODELVIEW);
 		gl2.glLoadIdentity();
-		glu.gluLookAt(0.0, 2, 20.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+		glu.gluLookAt(0.0, 0, 16.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
 		gl2.glEnable(GL2.GL_LIGHTING);
 
@@ -227,7 +235,7 @@ public class CGIntro implements GLEventListener {
 		gl2.glEnable(GL2.GL_LIGHT1);
 
 		try {
-			cgtexture = TextureIO.newTexture(new File("src/images/background3.jpg"), true);
+			cgtexture = TextureIO.newTexture(new File("src/images/backgound.jpg"), true);
 			cgtexture.enable(gl2);
 			//cgtextureAspect = ((float) cgtexture.getImageWidth()) / cgtexture.getImageHeight();
 		} catch (GLException | IOException e) {
@@ -251,6 +259,7 @@ public class CGIntro implements GLEventListener {
 		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
 		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
 		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);*/
+
 		gl2.glColor4f(1.0f, 1f, 1f, 1f);
 		glut.glutSolidSphere( 0.5, 50, 50);
 		gl2.glPopMatrix();
@@ -289,10 +298,11 @@ public class CGIntro implements GLEventListener {
 
 		gl2.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
-		// draw the cup normally
 		gl2.glPushMatrix();
 		drawBackground(gl2,glu,glut);
-		transAndRotate(gl2,glu,glut,0);
+		for (int i = 0; i < 10; i++) {
+			transAndRotate(gl2,glu,glut,i);
+		}
 		gl2.glPopMatrix();
 		// draw the shadow
 /*		gl2.glDisable(GL2.GL_LIGHTING);
@@ -321,8 +331,6 @@ public class CGIntro implements GLEventListener {
 			//System.out.println(time);
 			time += 1.0f / fps;
 		}
-
-
 		gl2.glFlush();
 	}
 
