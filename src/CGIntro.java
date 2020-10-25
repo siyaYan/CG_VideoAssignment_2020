@@ -1,59 +1,45 @@
-import java.awt.Dimension;
+import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.*;
+import com.jogamp.opengl.awt.GLJPanel;
+import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.util.FPSAnimator;
+import com.jogamp.opengl.util.PMVMatrix;
+import com.jogamp.opengl.util.gl2.GLUT;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
+
+import javax.sound.sampled.*;
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Random;
 
-import javax.swing.JFrame;
-
-import com.jogamp.common.nio.Buffers;
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLCapabilities;
-import com.jogamp.opengl.GLEventListener;
-import com.jogamp.opengl.GLException;
-import com.jogamp.opengl.GLProfile;
-import com.jogamp.opengl.awt.GLJPanel;
-import com.jogamp.opengl.glu.GLU;
-import com.jogamp.opengl.util.FPSAnimator;
-import com.jogamp.opengl.util.PMVMatrix;
-import com.jogamp.opengl.util.gl2.GLUT;
-import com.jogamp.opengl.util.glsl.ShaderState;
-import com.jogamp.opengl.util.texture.Texture;
-import com.jogamp.opengl.util.texture.TextureIO;
-
-import static com.jogamp.opengl.GL.GL_VERSION;
+import static javax.sound.sampled.AudioSystem.getAudioInputStream;
 
 public class CGIntro implements GLEventListener {
 
 	/**
 	 * CGIntro - a 10 second intro for CG.  Eric McCreath 2009, 2011, 2015, 2017
-	 * 
-	 * 
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 * random speed/direction/startPos/rotate & image/audio
 	 */
 
 	JFrame jf;
-
 	GLProfile profile;
 	GLCapabilities caps;
-
 	GLJPanel gljpanel;
-
 	Dimension dim = new Dimension(800, 600);
 	FPSAnimator animator;
-
 	float time;
-
-	PMVMatrix matrix;
-
-	Texture cgtexture;
-	float cgtextureAspect;
-
 	static int fps = 20;
 	static float introTime = 10.0f; // seconds
-
+	Texture cgtexture;
+	float cgtextureAspect;
+	PMVMatrix matrix;
 	int shaderprogram, vertexshader, fragshader;
 	int vertexbuffer[];
 	int colorbuffer[];
@@ -66,7 +52,58 @@ public class CGIntro implements GLEventListener {
 	int[] speed=new int[10];//-1,0,1(3 types)
 	boolean rote=false;
 
-	//random for one object(total have 10)
+	//todo for mac, i can only use the default shader version
+	static final String vertstr[] = { "attribute vec4 vertex;\n" + "attribute vec2 texcoord;\n"
+			+ "uniform mat4 mvMat, pMat;\n" + "varying vec2 tex_coord;\n" + "void main() {\n"
+			+ "    tex_coord = texcoord;\n" + "    gl_Position = (pMat * mvMat) * vertex;\n" + "}\n" };
+
+	static int vlens[] = new int[1];
+	static int flens[] = new int[1];
+
+	static final String fragstr[] = {
+			" uniform sampler2D texture;\n"
+					+ "varying vec2 tex_coord;\n" + "void main() {\n"
+					/*+ "gl_FragColor = vec4(0.5, 0.0, 0.0, 1.0);  \n"*/
+					+ "gl_FragColor = texture2D(texture,tex_coord);\n"
+					+ "}\n"
+	};
+
+	//play background
+	public void play(String filePath) throws IOException, UnsupportedAudioFileException {
+		AudioInputStream ais = AudioSystem.getAudioInputStream(new File(filePath));
+		try {
+			SourceDataLine line = AudioSystem.getSourceDataLine(ais.getFormat());
+			line.open();
+			line.start();
+			int readBytes = 0;
+			byte[] streamBuffer = new byte[512];
+			while (true) {
+				readBytes= ais.read(streamBuffer, 0, streamBuffer.length);
+				if (readBytes <= 0)
+					break;
+				line.write(streamBuffer, 0, readBytes);
+			}
+			line.drain();
+			line.close();
+		} catch (LineUnavailableException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
+		//File file = new File("src/background.wav");
+		new CGIntro();
+	}
+
+	/**
+	 * Random algorithms:(for one object, totally have 10)
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 * 3 options (1,0,-1) represent 3 types
+	 */
+
 	public void Random(int num) {
 		rote=false;
 		System.out.println("object "+num+": Random start!");
@@ -113,21 +150,24 @@ public class CGIntro implements GLEventListener {
 		speed[num]=rand.nextInt(3)-1;//random -1,0,1
 		System.out.println("speed:"+speed[num]+"\n");
 	}
+
 	/**
-	 * Random translation/rotation algorithms:
+	 * translation/rotation algorithms:
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
 	 * note:right is negative&top is negative
 	 */
-	public void transAndRotate() {
+
+	public void transAndRotate(int num) {
 		float scale = 1;
-		//falling down speed,rotate speed,goto right or left speed
-		float speedDown = 20*(time / introTime);
+		//falling down speed
+		float speedDown = (speed[num]*10+20)*(time / introTime);
+		//speed for rotate and to left or right is default
 		float speedRotate = 10*(time / introTime);
 		float speedLeftOrRight = 8*(time / introTime);
 		//todo have issue when both x and y are rotate, seems like change the shape of the object!
-		matrix.glTranslatef(startpos[0]+(speedLeftOrRight*direct[0]), (-10.0f)+(speedDown), 0.0f);
-		matrix.glRotatef(180.0f * (speedRotate), 1.0f*rotate[0], 1.0f*rotate[1], 1.0f*rotate[2]);
+		matrix.glTranslatef(startpos[num]+(speedLeftOrRight*direct[num]), (-10.0f)+(speedDown), 0.0f);
+		matrix.glRotatef(180.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
 
 		//time change from 0.0 to 9.95, every step increase 0.05
 		if (time < introTime) {
@@ -136,10 +176,11 @@ public class CGIntro implements GLEventListener {
 		}
 	}
 
-	public CGIntro() {
-		for (int i = 0; i < 10; i++) {
+	public CGIntro() throws IOException, UnsupportedAudioFileException {
+		/*for (int i = 0; i < 10; i++) {
 			Random(i);
-		}
+		}*/
+		Random(0);
 		jf = new JFrame("CG Intro");
 		profile = GLProfile.getDefault();
 		caps = new GLCapabilities(profile);
@@ -155,26 +196,8 @@ public class CGIntro implements GLEventListener {
 		animator = new FPSAnimator(gljpanel, fps);
 		time = 0.0f;
 		animator.start();
+		play("src/background.wav");
 	}
-
-	public static void main(String[] args) {
-		new CGIntro();
-	}
-	//todo for mac, i can only use the default shader version
-	static final String vertstr[] = { "attribute vec4 vertex;\n" + "attribute vec2 texcoord;\n"
-			+ "uniform mat4 mvMat, pMat;\n" + "varying vec2 tex_coord;\n" + "void main() {\n"
-			+ "    tex_coord = texcoord;\n" + "    gl_Position = (pMat * mvMat) * vertex;\n" + "}\n" };
-
-	static int vlens[] = new int[1];
-	static int flens[] = new int[1];
-
-	static final String fragstr[] = {
-			" uniform sampler2D texture;\n"
-			+ "varying vec2 tex_coord;\n" + "void main() {\n"
-			/*+ "gl_FragColor = vec4(0.5, 0.0, 0.0, 1.0);  \n"*/
-			+ "gl_FragColor = texture2D(texture,tex_coord);\n"
-			+ "}\n"
-	};
 
 	public void init(GLAutoDrawable dr) { // set up openGL for 2D drawing
 		GL2 gl2 = dr.getGL().getGL2();
@@ -266,23 +289,6 @@ public class CGIntro implements GLEventListener {
 		gl2.glBufferData(GL2.GL_ARRAY_BUFFER, (long) colorArray.length * 4, texCoordBuffer, GL2.GL_STATIC_DRAW);
 	}
 
-	private void checkok(GL2 gl2, int program, int type) {
-		IntBuffer intBuffer = IntBuffer.allocate(1);
-		gl2.glGetProgramiv(program, type, intBuffer);
-		if (intBuffer.get(0) != GL.GL_TRUE) {
-			int[] len = new int[1];
-			gl2.glGetProgramiv(program, GL2.GL_INFO_LOG_LENGTH, len, 0);
-			if (len[0] != 0) {
-				byte[] errormessage = new byte[len[0]];
-				gl2.glGetProgramInfoLog(program, len[0], len, 0, errormessage, 0);
-				System.err.println("problem\n" + new String(errormessage));
-				gljpanel.destroy();
-				jf.dispose();
-				System.exit(0);
-			}
-		}
-	}
-	
 	public void display(GLAutoDrawable dr) {
 		GL2 gl2 = dr.getGL().getGL2();
 		GLU glu = new GLU();
@@ -294,7 +300,8 @@ public class CGIntro implements GLEventListener {
 		// set up the matrix transformation - the idea was to create the sign to move up
 		// and rotate to front and center at the end
 		matrix.glPushMatrix();
-		transAndRotate();
+		System.out.println("in");
+		transAndRotate(0);
 
 		// load the uniforms
 		int mvMatrixID = gl2.glGetUniformLocation(shaderprogram, "mvMat");
@@ -314,7 +321,7 @@ public class CGIntro implements GLEventListener {
 		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, texbuffer[0]);
 		gl2.glVertexAttribPointer(texAttrib, 2, GL2.GL_FLOAT, false, 0, 0);
 
-		
+
 		gl2.glUniform1i(gl2.glGetUniformLocation(shaderprogram, "texture"), 0);
 		gl2.glActiveTexture(GL2.GL_TEXTURE0);
 		cgtexture.bind(gl2);
@@ -331,9 +338,27 @@ public class CGIntro implements GLEventListener {
 		gl2.glFlush();
 	}
 
+	private void checkok(GL2 gl2, int program, int type) {
+		IntBuffer intBuffer = IntBuffer.allocate(1);
+		gl2.glGetProgramiv(program, type, intBuffer);
+		if (intBuffer.get(0) != GL.GL_TRUE) {
+			int[] len = new int[1];
+			gl2.glGetProgramiv(program, GL2.GL_INFO_LOG_LENGTH, len, 0);
+			if (len[0] != 0) {
+				byte[] errormessage = new byte[len[0]];
+				gl2.glGetProgramInfoLog(program, len[0], len, 0, errormessage, 0);
+				System.err.println("problem\n" + new String(errormessage));
+				gljpanel.destroy();
+				jf.dispose();
+				System.exit(0);
+			}
+		}
+	}
+
 	public void dispose(GLAutoDrawable glautodrawable) {
 	}
 
 	public void reshape(GLAutoDrawable dr, int x, int y, int width, int height) {
 	}
+
 }
