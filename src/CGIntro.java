@@ -58,38 +58,60 @@ public class CGIntro implements GLEventListener {
 	int vertexbuffer[];
 	int colorbuffer[];
 	int texbuffer[];
-	int[] rotate={0,0,0};//rotate true/false for x,y,z
-	//we will have more than one objects for startpos and direction
-	int[] startpos ={0};//from -10 to 10
-	int[] dicrect = {0};//-1 or 1(righe or left)
+
+	//we will have more than one objects for the following natures
+	int[] rotate= new int[30];//rotate true/false for x,y,z
+	int[] startpos=new int[10];//from -10 to 10
+	int[] direct=new int[10];//-1 or 1(righe or left)
+	int[] speed=new int[10];//-1,0,1(3 types)
 	boolean rote=false;
 
-
-	public void Random() {
+	//random for one object(total have 10)
+	public void Random(int num) {
+		rote=false;
+		System.out.println("object "+num+": Random start!");
 		Random rand = new Random();
 		//ture or false for rotate x,y,z
 		for (int index = 0; index < 3; index++) {
-			rotate[index]=(int)(2*Math.random());//random 0,1
-			System.out.println(rotate[index]+",");
+			//rotate[num+index]=(int)(2*Math.random());//random 0,1
+			rotate[num+index]=rand.nextInt(3)-1;//random 1,0,-1
+			if (rotate[num + index] == 1||rotate[num + index] == -1) {
+				rote=true;
+			}
 		};
-		//random speedDicrect can only be 1 or -1
-		while (dicrect[0] == 0) {
-			dicrect[0]=rand.nextInt(3)-1;//random -1,0,1
+		//if x,y,z =0,x=1 default make object rotate to right in x axis
+		if (!rote) {
+			rotate[num]=1;
 		}
-		System.out.println(dicrect[0]);
+		System.out.println("rotate:"+rotate[num]+","+rotate[num+1]+","+rotate[num+2]+",");
 		//random from -10 to 10,note:-10 is the rightmost
-		startpos[0]=rand.nextInt(21)-10;
-		System.out.println(startpos[0]);
+		startpos[num]=rand.nextInt(21)-10;
+		// do not have the same startPos
+		if (num > 0) {
+			for (int i = 0; i < num; i++) {
+				while (startpos[i] == startpos[num]) {
+					startpos[num]=rand.nextInt(21)-10;
+				}
+			}
+		}
+		System.out.println("startos:"+startpos[num]);
+		//random speedDicrect can only be 1 or -1
+		while (direct[num] == 0) {
+			direct[num]=rand.nextInt(3)-1;//random -1,0,1
+		}
 		//make the falling more reasonale
 		//if the start point is too right,make is falling to left
-		if (startpos[0] <= -7) {
-			dicrect[0]=1;
+		if (startpos[num] <= -7) {
+			direct[num]=1;
 		}
 		//converse
-		if (startpos[0] >= 7) {
-			dicrect[0]=-1;
+		if (startpos[num] >= 7) {
+			direct[num]=-1;
 		}
-		System.out.println(dicrect[0]);
+		System.out.println("direct:"+direct[num]);
+		// 3 types of speed
+		speed[num]=rand.nextInt(3)-1;//random -1,0,1
+		System.out.println("speed:"+speed[num]+"\n");
 	}
 	/**
 	 * Random translation/rotation algorithms:
@@ -97,14 +119,14 @@ public class CGIntro implements GLEventListener {
 	 * @uid: u7167582
 	 * note:right is negative&top is negative
 	 */
-	public void transAndRotate(GL2 gl) {
+	public void transAndRotate() {
 		float scale = 1;
 		//falling down speed,rotate speed,goto right or left speed
 		float speedDown = 20*(time / introTime);
 		float speedRotate = 10*(time / introTime);
 		float speedLeftOrRight = 8*(time / introTime);
 		//todo have issue when both x and y are rotate, seems like change the shape of the object!
-		matrix.glTranslatef(startpos[0]+(speedLeftOrRight*dicrect[0]), (-10.0f)+(speedDown), 0.0f);
+		matrix.glTranslatef(startpos[0]+(speedLeftOrRight*direct[0]), (-10.0f)+(speedDown), 0.0f);
 		matrix.glRotatef(180.0f * (speedRotate), 1.0f*rotate[0], 1.0f*rotate[1], 1.0f*rotate[2]);
 
 		//time change from 0.0 to 9.95, every step increase 0.05
@@ -115,7 +137,9 @@ public class CGIntro implements GLEventListener {
 	}
 
 	public CGIntro() {
-		Random();
+		for (int i = 0; i < 10; i++) {
+			Random(i);
+		}
 		jf = new JFrame("CG Intro");
 		profile = GLProfile.getDefault();
 		caps = new GLCapabilities(profile);
@@ -162,7 +186,7 @@ public class CGIntro implements GLEventListener {
 		matrix.glMatrixMode(GL2.GL_PROJECTION);
 		matrix.glFrustumf(-2.0f, 2.0f, -2.0f, 2.0f, 1.0f, 10.0f);
 		matrix.glMatrixMode(GL2.GL_MODELVIEW);
-		matrix.gluLookAt(0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f);
+		matrix.gluLookAt(0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 		// setup and load the vertex and fragment shader programs
 		shaderprogram = gl2.glCreateProgram();
@@ -270,7 +294,7 @@ public class CGIntro implements GLEventListener {
 		// set up the matrix transformation - the idea was to create the sign to move up
 		// and rotate to front and center at the end
 		matrix.glPushMatrix();
-		transAndRotate(gl2);
+		transAndRotate();
 
 		// load the uniforms
 		int mvMatrixID = gl2.glGetUniformLocation(shaderprogram, "mvMat");
