@@ -2,6 +2,7 @@
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.gl2.GLUT;
 import com.jogamp.opengl.util.texture.Texture;
@@ -37,6 +38,7 @@ public class CGIntro implements GLEventListener {
 	static int fps = 20;
 	static float introTime = 50.0f; // seconds
 	Texture cgtexture;
+	Texture object;
 	float cgtextureAspect;
 
 	//we will have more than one objects for the following natures
@@ -49,7 +51,16 @@ public class CGIntro implements GLEventListener {
 
 	float lightpos[] = { 5f, 10f, 10f, 1.0f };
 
-	//play background
+	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
+		new CGIntro();
+	}
+
+	/**
+	 * play background music function:
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 * todo choose a more suitable wav file
+	 */
 	public void play(String filePath) throws IOException, UnsupportedAudioFileException {
 		AudioInputStream ais = AudioSystem.getAudioInputStream(new File(filePath));
 		try {
@@ -73,17 +84,12 @@ public class CGIntro implements GLEventListener {
 		}
 	}
 
-	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
-		new CGIntro();
-	}
-
 	/**
 	 * Random algorithms:(for one object, totally have 10)
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
 	 * 3 options (1,0,-1) represent 3 types
 	 */
-
 	public void Random(int num) {
 		rote=false;
 		System.out.println("object "+num+": Random start!");
@@ -138,36 +144,18 @@ public class CGIntro implements GLEventListener {
 	 * translation/rotation algorithms:
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
-	 * note:right is negative&top is negative
+	 * todo add Acceleration of gravity(acc seems reality)
 	 */
-
-/*	public void transAndRotate(int num) {
-		float scale = 1;
-		//falling down speed
-		float speedDown = (speed[num]*10+20)*(time / introTime);
-		//speed for rotate and to left or right is default
-		float speedRotate = 10*(time / introTime);
-		float speedLeftOrRight = 8*(time / introTime);
-		//todo have issue when both x and y are rotate, seems like change the shape of the object!
-		matrix.glTranslatef(startpos[num]+(speedLeftOrRight*direct[num]), (-10.0f)+(speedDown), 0.0f);
-		matrix.glRotatef(180.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
-
-		//time change from 0.0 to 9.95, every step increase 0.05
-		if (time < introTime) {
-			//System.out.println(time);
-			time += 1.0f / fps;
-		}
-	}*/
-
 	public void transAndRotate(GL2 gl2,GLU glu, GLUT glut,int num) {
 		float scale = 1;
-		//falling down speed
+		//falling down speed(10,20,30)-starttime(0-9)
 		float speedDown = (speed[num]*10+20)*(time / introTime)-starttime[num];
 		//speed for rotate and to left or right is default
 		float speedRotate = 10*(time / introTime);
 		float speedLeftOrRight = 8*(time / introTime);
 
 		gl2.glPushMatrix();
+		//if starttime haven't come
 		if (speedDown < 0) {
 			gl2.glTranslatef(startpos[num] + (speedLeftOrRight * direct[num]), (10.0f) , 0.0f);
 		} else {
@@ -182,6 +170,48 @@ public class CGIntro implements GLEventListener {
 			//System.out.println(time);
 			time += 1.0f / fps;
 		}
+	}
+
+	/**
+	 * using glusphere draw a simple sphere:
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 * todo texture binding to the sphere need to improve
+	 */
+	public void drawSphere(GL2 gl2, GLU glu, GLUT glut) {
+		gl2.glPushMatrix();
+		object.bind(gl2);
+		gl2.glEnable(GL2.GL_TEXTURE_2D);
+		GLUquadric sphere=glu.gluNewQuadric();
+		glu.gluQuadricDrawStyle(sphere,GLU.GLU_FILL);
+		glu.gluQuadricTexture(sphere, true);
+		glu.gluQuadricNormals(sphere, GLU.GLU_SMOOTH);
+		glu.gluSphere(sphere,0.5,50,50);
+		gl2.glPopMatrix();
+	}
+
+	/**
+	 * draw the background:
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 * todo choose a more suitable image
+	 */
+	public void drawBackground(GL2 gl2, GLU glu, GLUT glut) {
+		gl2.glPushMatrix();
+		cgtexture.bind(gl2);
+		gl2.glEnable(GL2.GL_TEXTURE_2D);
+		gl2.glBegin(GL2.GL_POLYGON);
+		gl2.glVertex3d(-20.0, -20.0, -10.0);
+		gl2.glTexCoord3d(0.0,0.0,0.0);
+		gl2.glVertex3d(-20.0, 20.0, -10.0);
+		gl2.glTexCoord3d(1.0,0.0,0.0);
+		gl2.glVertex3d(20.0, 20.0, -10.0);
+		gl2.glTexCoord3d(1.0,1.0,0.0);
+		gl2.glVertex3d(20.0, -20.0, -10.0);
+		gl2.glTexCoord3d(0.0,1.0,0.0);
+		gl2.glEnd();
+		gl2.glDisable(GL2.GL_TEXTURE_2D);
+		gl2.glPopMatrix();
 	}
 
 	public CGIntro() throws IOException, UnsupportedAudioFileException {
@@ -207,6 +237,12 @@ public class CGIntro implements GLEventListener {
 		play("src/background.wav");
 	}
 
+	/**
+	 * init the environment with 2 light and load file
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 *
+	 */
 	public void init(GLAutoDrawable dr) { // set up openGL for 2D drawing
 		GL2 gl2 = dr.getGL().getGL2();
 		GLU glu = new GLU();
@@ -236,6 +272,8 @@ public class CGIntro implements GLEventListener {
 
 		try {
 			cgtexture = TextureIO.newTexture(new File("src/images/backgound.jpg"), true);
+			object = TextureIO.newTexture(new File("src/images/strawberry_1.jpg"), true);
+			object.enable(gl2);
 			cgtexture.enable(gl2);
 			//cgtextureAspect = ((float) cgtexture.getImageWidth()) / cgtexture.getImageHeight();
 		} catch (GLException | IOException e) {
@@ -244,53 +282,12 @@ public class CGIntro implements GLEventListener {
 
 	}
 
-	// draw a simple sphere
-	public void drawSphere(GL2 gl2, GLU glu, GLUT glut) {
-		gl2.glPushMatrix();
-		/*gl2.glTexGeni(GL2.GL_S, GL2.GL_TEXTURE_GEN_MODE,GL2.GL_OBJECT_LINEAR);
-		gl2.glTexGeni(GL2.GL_T, GL2.GL_TEXTURE_GEN_MODE,GL2.GL_OBJECT_LINEAR);
-		gl2.glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP);
-		gl2.glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP);
-		gl2.glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP);
-		gl2.glEnable(GL2.GL_TEXTURE_2D);
-		gl2.glEnable(GL2.GL_TEXTURE_GEN_S);
-		gl2.glEnable(GL2.GL_TEXTURE_GEN_T);
-		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
-		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
-		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
-		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);*/
-
-		gl2.glColor4f(1.0f, 1f, 1f, 1f);
-		glut.glutSolidSphere( 0.5, 50, 50);
-		gl2.glPopMatrix();
-	}
-
-	public void drawBackground(GL2 gl2, GLU glu, GLUT glut) {
-		gl2.glPushMatrix();
-		/*gl2.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
-		gl2.glEnable(GL2.GL_LIGHTING);
-
-		// draw the floor
-		float dff[] = { 0.7f, 0.3f, 1.0f, 0.0f };
-		gl2.glMaterialfv(GL2.GL_FRONT_AND_BACK, GL2.GL_AMBIENT_AND_DIFFUSE,
-				dff, 0);*/
-		gl2.glPushMatrix();
-		cgtexture.bind(gl2);
-		gl2.glEnable(GL2.GL_TEXTURE_2D);
-		gl2.glBegin(GL2.GL_POLYGON);
-		gl2.glVertex3d(-20.0, -20.0, -10.0);
-		gl2.glTexCoord3d(0.0,0.0,0.0);
-		gl2.glVertex3d(-20.0, 20.0, -10.0);
-		gl2.glTexCoord3d(1.0,0.0,0.0);
-		gl2.glVertex3d(20.0, 20.0, -10.0);
-		gl2.glTexCoord3d(1.0,1.0,0.0);
-		gl2.glVertex3d(20.0, -20.0, -10.0);
-		gl2.glTexCoord3d(0.0,1.0,0.0);
-		gl2.glEnd();
-		gl2.glDisable(GL2.GL_TEXTURE_2D);
-		gl2.glPopMatrix();
-	}
-
+	/**
+	 * using glusphere draw a simple sphere:
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 * todo setup the shadow for objects
+	 */
 	public void display(GLAutoDrawable dr) {
 		GL2 gl2 = dr.getGL().getGL2();
 		GLU glu = new GLU();
@@ -298,12 +295,12 @@ public class CGIntro implements GLEventListener {
 
 		gl2.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
-		gl2.glPushMatrix();
 		drawBackground(gl2,glu,glut);
+		//10 objects
 		for (int i = 0; i < 10; i++) {
 			transAndRotate(gl2,glu,glut,i);
 		}
-		gl2.glPopMatrix();
+
 		// draw the shadow
 /*		gl2.glDisable(GL2.GL_LIGHTING);
 		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
