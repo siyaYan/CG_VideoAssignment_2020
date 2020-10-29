@@ -180,7 +180,6 @@ public class CGIntro implements GLEventListener {
 	 * translation/rotation algorithms
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
-	 * todo add Acceleration of gravity(acc seems reality)
 	 */
 	public void transAndRotate(GL2 gl2,GLU glu, GLUT glut,int num) {
 		float scale = 1;
@@ -235,7 +234,7 @@ public class CGIntro implements GLEventListener {
 	 * using glusphere draw a simple sphere
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
-	 * todo texture binding to the sphere need to improve
+	 * todo import object build in blender
 	 */
 	public void drawSphere(GL2 gl2, GLU glu, GLUT glut) {
 		gl2.glPushMatrix();
