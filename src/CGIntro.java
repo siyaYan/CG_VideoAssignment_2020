@@ -55,9 +55,11 @@ public class CGIntro implements GLEventListener {
 	int[] starttime=new int[objectNum];//0-10(10 types)
 	boolean rote=false;
 
-	float lightpos[] = { 3f, 4f, 10f, 1.0f };
-	float ground[] = { 0.0f, 0.0f, -7.0f };
-	float groundnormal[] = { 0.0f, 0.0f, -1.0f };
+	float lightpos[] = { 2f, 2f, 30f, 1.0f };
+	float groundShadow[] = { 0.0f, 0.0f, -5.0f };
+	//size 40*40 pos(0,0,-15)
+	float background[] = { 40.0f, 40.0f, -15.0f };
+	float groundnormal[] = { 0.0f, 0.0f, -10.0f };
 
 	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
 		new CGIntro();
@@ -139,9 +141,6 @@ public class CGIntro implements GLEventListener {
 
 		//object moving direction
 		//random directx/directz from -1 to 1
-		/*while (directx[num] == 0) {
-			directx[num]=rand.nextInt(3)-1;//random -1,0,1
-		}*/
 		directx[num]=rand.nextInt(3)-1;//random -1,0,1
 		directz[num]=rand.nextInt(3)-1;//random -1,0,1
 
@@ -187,7 +186,8 @@ public class CGIntro implements GLEventListener {
 		float speedDown = (speed[num]*10+20)*(time / introTime)-starttime[num];
 		//speed for rotate and to left or right is default
 		float speedRotate = 10*(time / introTime);
-		float speedLeftOrRight = 6*(time / introTime);
+		float speedLeftOrRight = 8*(time / introTime);
+		float speedBackOrFront = 6*(time / introTime);
 
 		gl2.glPushMatrix();
 		//if it's not your turn stay in the pos (0,20,0)
@@ -195,7 +195,7 @@ public class CGIntro implements GLEventListener {
 			gl2.glTranslatef(0, 20 , 0.0f);
 		}
 		else {
-			gl2.glTranslatef(startposx[num]+(speedLeftOrRight*directx[num]), (10.0f)-(speedDown), startposz[num]+(speedLeftOrRight*directz[num]));
+			gl2.glTranslatef(startposx[num]+(speedLeftOrRight*directx[num]), (10.0f)-(speedDown), startposz[num]+(speedBackOrFront*directz[num]));
 		}
 		//every second rotate 90
 		gl2.glRotatef(90.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
@@ -208,7 +208,7 @@ public class CGIntro implements GLEventListener {
 			gl2.glTranslatef(0,20,0.0f);
 		}
 		else {
-			gl2.glTranslatef(startposx[num]+(speedLeftOrRight*directx[num]), (10.0f)-(speedDown), startposz[num]+(speedLeftOrRight*directz[num]));
+			gl2.glTranslatef(startposx[num]+(speedLeftOrRight*directx[num]), (10.0f)-(speedDown), startposz[num]+(speedBackOrFront*directz[num]));
 		}
 		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
 		gl2.glDisable(GL2.GL_LIGHTING);
@@ -216,7 +216,7 @@ public class CGIntro implements GLEventListener {
 		gl2.glPushMatrix();
 		float[] rgb=Color.darkGray.getColorComponents(null);
 		gl2.glColor3d(rgb[0],rgb[1],rgb[2]);
-		projectShadow(gl2, ground, groundnormal, lightpos);
+		projectShadow(gl2, groundShadow, groundnormal, lightpos);
 		//gl2.glColor3d(1,0,0);
 		drawShadow(gl2,glu,glut);
 		gl2.glPopMatrix();
@@ -276,14 +276,14 @@ public class CGIntro implements GLEventListener {
 		cgtexture.bind(gl2);
 		gl2.glEnable(GL2.GL_TEXTURE_2D);
 		gl2.glBegin(GL2.GL_POLYGON);
-		gl2.glVertex3d(-20.0, -20.0, ground[2]-1);
-		gl2.glTexCoord3d(0.0,0.0,ground[2]-1);
-		gl2.glVertex3d(-20.0, 20.0, ground[2]-1);
-		gl2.glTexCoord3d(1.0,0.0,ground[2]-1);
-		gl2.glVertex3d(20.0, 20.0, ground[2]-1);
-		gl2.glTexCoord3d(1.0,1.0,ground[2]-1);
-		gl2.glVertex3d(20.0, -20.0, ground[2]-1);
-		gl2.glTexCoord3d(0.0,1.0,ground[2]-1);
+		gl2.glVertex3d(-(background[0]/2), -(background[1]/2), background[2]);
+		gl2.glTexCoord3d(0.0,0.0,background[2]);
+		gl2.glVertex3d(-(background[0]/2), (background[1]/2), background[2]);
+		gl2.glTexCoord3d(1.0,0.0,background[2]);
+		gl2.glVertex3d((background[0]/2), (background[1]/2), background[2]);
+		gl2.glTexCoord3d(1.0,1.0,background[2]);
+		gl2.glVertex3d((background[0]/2), -(background[1]/2), background[2]);
+		gl2.glTexCoord3d(0.0,1.0,background[2]);
 		gl2.glEnd();
 		gl2.glDisable(GL2.GL_TEXTURE_2D);
 		gl2.glPopMatrix();
@@ -337,7 +337,7 @@ public class CGIntro implements GLEventListener {
 
 		gl2.glMatrixMode(GL2.GL_MODELVIEW);
 		gl2.glLoadIdentity();
-		glu.gluLookAt(0.0, 0, 16.0, 0, 0.0, 0.0, 0.0, 1.0, 0.0);
+		glu.gluLookAt(0.0, 0, 15.0, 0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
 		gl2.glEnable(GL2.GL_LIGHTING);
 
