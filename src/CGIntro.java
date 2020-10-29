@@ -23,9 +23,11 @@ public class CGIntro implements GLEventListener {
 
 	/**
 	 * CGIntro - a 10 second intro for CG.  Eric McCreath 2009, 2011, 2015, 2017
+	 *
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
-	 * random speed/direction/startPos/rotate & image/audio
+	 * many objects with texture randomly from different position falling down with various moving track(have background music)
+	 * Random: start position/falling speed/falling direction/rotate direction
 	 */
 
 	JFrame jf;
@@ -36,27 +38,30 @@ public class CGIntro implements GLEventListener {
 	FPSAnimator animator;
 	float time;
 	static int fps = 20;
-	static float introTime = 50.0f; // seconds
+	static float introTime = 100.0f; // seconds
 	Texture cgtexture;
 	Texture object;
-	float cgtextureAspect;
 
-	//we will have more than one objects for the following natures
-	int[] rotate= new int[30];//rotate true/false for x,y,z
-	int[] startpos=new int[10];//from -10 to 10
-	int[] direct=new int[10];//-1 or 1(righe or left)
-	int[] speed=new int[10];//-1,0,1(3 types)
-	int[] starttime=new int[10];//0-10(10 types)
+	//number of objects
+	int objectNum=10;
+
+	//we have more than one objects for the following natures
+	int[] rotate= new int[3*objectNum];//rotate true/false for x,y,z(one object have to store 3 boolean state)
+	int[] startposx=new int[objectNum];//from -10 to 10 in x axis
+	int[] startposz=new int[objectNum];//from -1/0/1 to chose start pos in z axis
+	int[] directx=new int[objectNum];//-1/0/1(go to righe/none/left in x axis)
+	int[] directz=new int[objectNum];//-1/0/1(go to righe/none/left in z axis)
+	int[] speed=new int[objectNum];//-1,0,1(3 types: slow/nomal/fast)
+	int[] starttime=new int[objectNum];//0-10(10 types)
 	boolean rote=false;
 
 	float lightpos[] = { 3f, 4f, 10f, 1.0f };
-	float ground[] = { 0.0f, 0.0f, -3.0f };
+	float ground[] = { 0.0f, 0.0f, -7.0f };
 	float groundnormal[] = { 0.0f, 0.0f, -1.0f };
 
 	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
 		new CGIntro();
 	}
-
 	/**
 	 * play background music function:
 	 * @auther: Xiran Yan(Siya)
@@ -96,6 +101,8 @@ public class CGIntro implements GLEventListener {
 		rote=false;
 		System.out.println("object "+num+": Random start!");
 		Random rand = new Random();
+
+		//object rotate direction
 		//ture or false for rotate x,y,z
 		for (int index = 0; index < 3; index++) {
 			//rotate[num+index]=(int)(2*Math.random());//random 0,1
@@ -109,41 +116,68 @@ public class CGIntro implements GLEventListener {
 			rotate[num]=1;
 		}
 		System.out.println("rotate:"+rotate[num]+","+rotate[num+1]+","+rotate[num+2]+",");
-		//random from -10 to 10,note:-10 is the rightmost
-		startpos[num]=rand.nextInt(21)-10;
+
+		//obejct start position(in x/z axis,y axis is fixed)
+		//startposx from -10 to 10 in x axis
+		startposx[num]=rand.nextInt(21)-10;
+		//startposz from -1 to 1 in z axis
+		startposz[num]=rand.nextInt(3)-1;
+
 		// do not have the same startPos
 		if (num > 0) {
 			for (int i = 0; i < num; i++) {
-				while (startpos[i] == startpos[num]) {
-					startpos[num]=rand.nextInt(21)-10;
+				while (startposx[i] == startposx[num]) {
+					startposx[num]=rand.nextInt(21)-10;
+				}
+				while (startposz[i] == startposz[num]) {
+					startposz[num]=rand.nextInt(3)-1;
 				}
 			}
 		}
-		System.out.println("startos:"+startpos[num]);
-		//random speedDicrect can only be 1 or -1
-		while (direct[num] == 0) {
-			direct[num]=rand.nextInt(3)-1;//random -1,0,1
-		}
+		System.out.println("startposx:"+startposx[num]);
+		System.out.println("startposz:"+startposz[num]);
+
+		//object moving direction
+		//random directx/directz from -1 to 1
+		/*while (directx[num] == 0) {
+			directx[num]=rand.nextInt(3)-1;//random -1,0,1
+		}*/
+		directx[num]=rand.nextInt(3)-1;//random -1,0,1
+		directz[num]=rand.nextInt(3)-1;//random -1,0,1
+
 		//make the falling more reasonale
 		//if the start point is too right,make is falling to left
-		if (startpos[num] <= -8) {
-			direct[num]=1;
+		if (startposx[num] <= -8) {
+			directx[num]=1;
 		}
 		//converse
-		if (startpos[num] >= 8) {
-			direct[num]=-1;
+		if (startposx[num] >= 8) {
+			directx[num]=-1;
 		}
-		System.out.println("direct:"+direct[num]);
+		//if the start point is too back,make is falling to front
+		if (startposz[num] < 0) {
+			directz[num]=1;
+		}
+		//converse
+		if (startposz[num] > 0) {
+			directz[num]=-1;
+		}
+		System.out.println("directx:"+directx[num]);
+		System.out.println("directz:"+directz[num]);
+
+		//object moving speed
 		// 3 types of speed
 		speed[num]=rand.nextInt(3)-1;//random -1,0,1
 		System.out.println("speed:"+speed[num]);
+
+		//object moving start time
 		//start time from 0-9
 		starttime[num]=rand.nextInt(10);//random 1,0,-1
 		System.out.println("startTime:"+starttime[num]+"\n");
 	}
 
 	/**
-	 * translation/rotation algorithms:
+	 * translation/rotation algorithms
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
 	 * todo add Acceleration of gravity(acc seems reality)
@@ -154,28 +188,32 @@ public class CGIntro implements GLEventListener {
 		float speedDown = (speed[num]*10+20)*(time / introTime)-starttime[num];
 		//speed for rotate and to left or right is default
 		float speedRotate = 10*(time / introTime);
-		float speedLeftOrRight = 8*(time / introTime);
+		float speedLeftOrRight = 6*(time / introTime);
 
 		gl2.glPushMatrix();
-		//if starttime haven't come
+		//if it's not your turn stay in the pos (0,20,0)
 		if (speedDown < 0) {
 			gl2.glTranslatef(0, 20 , 0.0f);
-		} else {
-			gl2.glTranslatef(startpos[num]+(speedLeftOrRight*direct[num]), (10.0f)-(speedDown), 0.0f);
 		}
-		gl2.glRotatef(180.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
+		else {
+			gl2.glTranslatef(startposx[num]+(speedLeftOrRight*directx[num]), (10.0f)-(speedDown), startposz[num]+(speedLeftOrRight*directz[num]));
+		}
+		//every second rotate 90
+		gl2.glRotatef(90.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
 		drawSphere(gl2,glu,glut);
 		gl2.glPopMatrix();
 
 		gl2.glPushMatrix();
+		//if it's not your turn stay in the pos (0,20,0)
 		if (speedDown < 0) {
-			gl2.glTranslatef(0,20,0);
-		} else {
-			gl2.glTranslatef(startpos[num]+(speedLeftOrRight*direct[num]), (10.0f)-(speedDown), 0.0f);
+			gl2.glTranslatef(0,20,0.0f);
+		}
+		else {
+			gl2.glTranslatef(startposx[num]+(speedLeftOrRight*directx[num]), (10.0f)-(speedDown), startposz[num]+(speedLeftOrRight*directz[num]));
 		}
 		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
 		gl2.glDisable(GL2.GL_LIGHTING);
-		gl2.glPolygonOffset(-1.0f, -1.0f);
+		gl2.glPolygonOffset(-0.5f, -0.5f);
 		gl2.glPushMatrix();
 		float[] rgb=Color.darkGray.getColorComponents(null);
 		gl2.glColor3d(rgb[0],rgb[1],rgb[2]);
@@ -186,7 +224,7 @@ public class CGIntro implements GLEventListener {
 		gl2.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
 		gl2.glEnable(GL2.GL_LIGHTING);
 		gl2.glPopMatrix();
-		//time change from 0.0 to 9.95, every step increase 0.05
+		//time change from 0.0 to 99.95, every step increase 0.05
 		if (time < introTime) {
 			//System.out.println(time);
 			time += 1.0f / fps;
@@ -194,7 +232,7 @@ public class CGIntro implements GLEventListener {
 	}
 
 	/**
-	 * using glusphere draw a simple sphere:
+	 * using glusphere draw a simple sphere
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
 	 * todo texture binding to the sphere need to improve
@@ -210,6 +248,12 @@ public class CGIntro implements GLEventListener {
 		glu.gluSphere(sphere,0.5,50,50);
 		gl2.glPopMatrix();
 	}
+
+	/**
+	 * disable bind and draw sphere shadow
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 */
 	public void drawShadow(GL2 gl2, GLU glu, GLUT glut) {
 		object.disable(gl2);
 		gl2.glPushMatrix();
@@ -221,8 +265,9 @@ public class CGIntro implements GLEventListener {
 		gl2.glPopMatrix();
 		object.enable(gl2);
 	}
+
 	/**
-	 * draw the background:
+	 * bind texture and draw the background
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
 	 * todo choose a more suitable image
@@ -232,19 +277,24 @@ public class CGIntro implements GLEventListener {
 		cgtexture.bind(gl2);
 		gl2.glEnable(GL2.GL_TEXTURE_2D);
 		gl2.glBegin(GL2.GL_POLYGON);
-		gl2.glVertex3d(-20.0, -20.0, ground[2]);
-		gl2.glTexCoord3d(0.0,0.0,ground[2]);
-		gl2.glVertex3d(-20.0, 20.0, ground[2]);
-		gl2.glTexCoord3d(1.0,0.0,ground[2]);
-		gl2.glVertex3d(20.0, 20.0, ground[2]);
-		gl2.glTexCoord3d(1.0,1.0,ground[2]);
-		gl2.glVertex3d(20.0, -20.0, ground[2]);
-		gl2.glTexCoord3d(0.0,1.0,ground[2]);
+		gl2.glVertex3d(-20.0, -20.0, ground[2]-1);
+		gl2.glTexCoord3d(0.0,0.0,ground[2]-1);
+		gl2.glVertex3d(-20.0, 20.0, ground[2]-1);
+		gl2.glTexCoord3d(1.0,0.0,ground[2]-1);
+		gl2.glVertex3d(20.0, 20.0, ground[2]-1);
+		gl2.glTexCoord3d(1.0,1.0,ground[2]-1);
+		gl2.glVertex3d(20.0, -20.0, ground[2]-1);
+		gl2.glTexCoord3d(0.0,1.0,ground[2]-1);
 		gl2.glEnd();
 		gl2.glDisable(GL2.GL_TEXTURE_2D);
 		gl2.glPopMatrix();
 	}
 
+	/**
+	 * init the setting, start random, and play music
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 */
 	public CGIntro() throws IOException, UnsupportedAudioFileException {
 		for (int i = 0; i < 10; i++) {
 			Random(i);
@@ -269,12 +319,12 @@ public class CGIntro implements GLEventListener {
 	}
 
 	/**
-	 * init the environment with 2 light and load file
+	 * init the opengl setting with 2 light and load texture file
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
 	 *
 	 */
-	public void init(GLAutoDrawable dr) { // set up openGL for 2D drawing
+	public void init(GLAutoDrawable dr) {
 		GL2 gl2 = dr.getGL().getGL2();
 		GLU glu = new GLU();
 		GLUT glut = new GLUT();
@@ -288,7 +338,7 @@ public class CGIntro implements GLEventListener {
 
 		gl2.glMatrixMode(GL2.GL_MODELVIEW);
 		gl2.glLoadIdentity();
-		glu.gluLookAt(0.0, 0, 16.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+		glu.gluLookAt(0.0, 0, 16.0, 0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
 		gl2.glEnable(GL2.GL_LIGHTING);
 
@@ -319,10 +369,9 @@ public class CGIntro implements GLEventListener {
 	}
 
 	/**
-	 * using glusphere draw a simple sphere:
+	 * draw 10 objects with texture and shadows, can falling down in different speed direction and start from different position
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
-	 * todo modify the shadows for objects
 	 */
 	public void display(GLAutoDrawable dr) {
 		GL2 gl2 = dr.getGL().getGL2();
@@ -344,8 +393,7 @@ public class CGIntro implements GLEventListener {
 		gl2.glFlush();
 	}
 
-	//	ShadowCup - this is a simple example of using a transformation to create shadows
-	//	Eric McCreath 2009, 2011, 2015
+	//Eric McCreath 2009, 2011, 2015
 	// multiply the current matrix with a projection matrix that will do the
 	// shadow
 	static void projectShadow(GL2 gl, float s[], float n[], float l[]) {
@@ -382,6 +430,7 @@ public class CGIntro implements GLEventListener {
 	private static int index(int j, int i) {
 		return j + 4 * i;
 	}
+
 	public void dispose(GLAutoDrawable glautodrawable) {
 	}
 
