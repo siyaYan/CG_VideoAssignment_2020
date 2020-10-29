@@ -54,11 +54,16 @@ public class CGIntro implements GLEventListener {
 	int[] speed=new int[objectNum];//-1,0,1(3 types: slow/nomal/fast)
 	int[] starttime=new int[objectNum];//0-10(10 types)
 	boolean rote=false;
+	float xSpeed=8;
+	float zSpeed=6;
+	float rotateSpeed=5;
 
 	float lightpos[] = { 2f, 2f, 30f, 1.0f };
-	float groundShadow[] = { 0.0f, 0.0f, -5.0f };
 	//size 40*40 pos(0,0,-15)
 	float background[] = { 40.0f, 40.0f, -15.0f };
+
+	//for shadow
+	float groundShadow[] = { 0.0f, 0.0f, -5.0f };
 	float groundnormal[] = { 0.0f, 0.0f, -10.0f };
 
 	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
@@ -185,9 +190,9 @@ public class CGIntro implements GLEventListener {
 		//falling down speed(10,20,30)-starttime(0-9)
 		float speedDown = (speed[num]*10+20)*(time / introTime)-starttime[num];
 		//speed for rotate and to left or right is default
-		float speedRotate = 10*(time / introTime);
-		float speedLeftOrRight = 8*(time / introTime);
-		float speedBackOrFront = 6*(time / introTime);
+		float speedLeftOrRight=xSpeed*(time / introTime);
+		float speedBackOrFront=zSpeed*(time / introTime);
+		float speedRotate=rotateSpeed * (time / introTime);
 
 		gl2.glPushMatrix();
 		//if it's not your turn stay in the pos (0,20,0)
@@ -198,7 +203,7 @@ public class CGIntro implements GLEventListener {
 			gl2.glTranslatef(startposx[num]+(speedLeftOrRight*directx[num]), (10.0f)-(speedDown), startposz[num]+(speedBackOrFront*directz[num]));
 		}
 		//every second rotate 90
-		gl2.glRotatef(90.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
+		gl2.glRotatef(180.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
 		drawSphere(gl2,glu,glut);
 		gl2.glPopMatrix();
 
