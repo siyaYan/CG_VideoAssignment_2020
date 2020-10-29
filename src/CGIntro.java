@@ -14,7 +14,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.*;
 import java.util.Random;
 
 import static javax.sound.sampled.AudioSystem.getAudioInputStream;
@@ -300,7 +299,7 @@ public class CGIntro implements GLEventListener {
 	 * @uid: u7167582
 	 */
 	public CGIntro() throws IOException, UnsupportedAudioFileException {
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < objectNum; i++) {
 			Random(i);
 		}
 		//Random(0);

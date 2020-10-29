@@ -14,8 +14,7 @@ Each member of the group should individually add and commit their name here as a
 
 Please reference any material you used in completing this assignment here (also reference it within the source code that it is used).   Once done this line can also be removed. 
 
-+ reference 1 
-+ reference 2
++ Eric McCreath (CG_examplecode shadow function)
 + ... 
 images:
 <span>Photo by <a href="https://unsplash.com/@rmallick6806?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Ray Mallick</a> on <a href="https://unsplash.com/s/photos/background?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Unsplash</a></span>
