@@ -271,6 +271,7 @@ public class CGIntro implements GLEventListener {
 		else {
 			gl2.glTranslatef(startposx[num]+(speedLeftOrRight*directx[num]), (10.0f)-(speedDown), startposz[num]+(speedBackOrFront*directz[num]));
 		}
+		gl2.glRotatef(180.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
 		gl2.glScaled(scale,scale,scale);
 		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
 		gl2.glDisable(GL2.GL_LIGHTING);
@@ -329,6 +330,7 @@ public class CGIntro implements GLEventListener {
 			gl2.glTranslatef(0,20,0.0f);
 		} else if (position>stopPosLetters) {
 			gl2.glTranslatef(startPosLetter[num], (10.0f) - (speedDown), 0);
+			gl2.glRotatef(360.0f * (rotation), 0f, 1f, 0f);
 		} else {
 			gl2.glTranslatef(startPosLetter[num], stopPosLetters, 0);
 		}
@@ -370,23 +372,6 @@ public class CGIntro implements GLEventListener {
 		gl2.glPopMatrix();
 	}
 
-	/**
-	 * test something
-	 * @auther: Xiran Yan(Siya)
-	 * @uid: u7167582
-	 */
-	public void drawSomething(GL2 gl2, GLU glu, GLUT glut) {
-		gl2.glPushMatrix();
-		test.bind(gl2);
-		gl2.glEnable(GL2.GL_TEXTURE_2D);
-		GLUquadric some=glu.gluNewQuadric();
-		glu.gluQuadricDrawStyle(some,GLU.GLU_FILL);
-		glu.gluQuadricTexture(some, true);
-		glu.gluQuadricNormals(some, GLU.GLU_SMOOTH);
-		glu.gluSphere(some,0.5,50,50);
-		//glu.gluCylinder(some,1,1,1,1,1);
-		gl2.glPopMatrix();
-	}
 	
 	/**
 	 * drawObj - uses vector data and triangle indicies to map textures and verticies to buffer for displaying .obj imported objects.
@@ -575,7 +560,7 @@ public class CGIntro implements GLEventListener {
 		gl2.glEnable(GL2.GL_LIGHT2);
 
 		try {
-			backgroundtexture = TextureIO.newTexture(new File("src/images/backgound.jpg"), true);
+			backgroundtexture = TextureIO.newTexture(new File("src/images/background4.jpg"), true);
 			object = TextureIO.newTexture(new File("src/images/strawberry_2.jpg"), true);
 			ninjatextures = TextureIO.newTexture(new File("src/images/ninjatextures.jpeg"), true);
 
