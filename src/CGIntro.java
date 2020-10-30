@@ -15,6 +15,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
+import java.util.Vector;
 
 import static javax.sound.sampled.AudioSystem.getAudioInputStream;
 
@@ -46,6 +47,7 @@ public class CGIntro implements GLEventListener {
 	Texture cgtexture;
 	Texture object;
 	Texture test;
+	Texture ninjatextures;
 
 	//number of fruit objects
 	int objectNum=10;
@@ -370,6 +372,53 @@ public class CGIntro implements GLEventListener {
 		//glu.gluCylinder(some,1,1,1,1,1);
 		gl2.glPopMatrix();
 	}
+	
+	/**
+	 * drawObj
+	 * @auther:Jaryd Sartori
+	 * @uid: u5799628
+	 */
+	public void drawObj(GL2 gl2, GLU glu, GLUT glut, String file, float xOffset) { 
+		gl2.glPushMatrix();
+		gl2.glScalef(2.0f, 2.0f, 2.0f);
+//		xOffset aligns each letter consecutively based off manual refinement
+		gl2.glTranslatef(xOffset, 0.0f, 0.0f);
+	
+		Vector<float[]> verts = new Vector<float[]>();
+		Vector<float[]> uvs = new Vector<float[]>();
+		Vector<float[]> norms = new Vector<float[]>();
+
+		Mesh.loadObjModel(file, verts, uvs, norms);
+
+		ninjatextures.bind(gl2);
+		gl2.glEnable(GL2.GL_TEXTURE_2D);
+		gl2.glBegin(GL2.GL_TRIANGLES);
+		for (int i = 0; i < verts.size(); i++) {
+			if(i%3 == 0) { 			
+//				first vertex normal, vertex, uv
+				gl2.glNormal3f(norms.get(i)[0], norms.get(i)[1], norms.get(i)[2]);
+				gl2.glVertex3f(verts.get(i)[0], verts.get(i)[1], verts.get(i)[2]);
+				gl2.glTexCoord2f(uvs.get(i)[0], uvs.get(i)[1]);
+//				second vertex normal, vertex, uv
+				gl2.glNormal3f(norms.get(i+1)[0], norms.get(i+1)[1], norms.get(i+1)[2]);
+				gl2.glVertex3f(verts.get(i+1)[0], verts.get(i+1)[1], verts.get(i+1)[2]);
+				gl2.glTexCoord2f(uvs.get(i+1)[0], uvs.get(i+1)[1]);
+//				third vertex: normal, vertex, uv
+				gl2.glNormal3f(norms.get(i+2)[0], norms.get(i+2)[1], norms.get(i+2)[2]);
+				gl2.glVertex3f(verts.get(i+2)[0], verts.get(i+2)[1], verts.get(i+2)[2]);
+				gl2.glTexCoord2f(uvs.get(i+2)[0], uvs.get(i+2)[1]);
+				
+			}
+		
+		}
+		
+		gl2.glDisable(GL2.GL_TEXTURE_2D);
+		gl2.glEnd();
+		gl2.glPopMatrix();
+		
+	}
+	
+	
 
 	/**
 	 * disable bind and draw sphere shadow
@@ -484,9 +533,11 @@ public class CGIntro implements GLEventListener {
 			cgtexture = TextureIO.newTexture(new File("src/images/backgound.jpg"), true);
 			object = TextureIO.newTexture(new File("src/images/strawberry_2.jpg"), true);
 			test = TextureIO.newTexture(new File("src/images/background4.jpg"), true);
+			ninjatextures = TextureIO.newTexture(new File("src/images/ninjatextures.jpeg"), true);
 			test.enable(gl2);
 			object.enable(gl2);
 			cgtexture.enable(gl2);
+			ninjatextures.enable(gl2);
 			//cgtextureAspect = ((float) cgtexture.getImageWidth()) / cgtexture.getImageHeight();
 		} catch (GLException | IOException e) {
 			e.printStackTrace();
@@ -514,6 +565,11 @@ public class CGIntro implements GLEventListener {
 		for (int i = 0; i < letterNum; i++) {
 			transAndRotateLetters(gl2,glu,glut,i);
 		}
+		drawObj(gl2,glu,glut,"letters/n-1.obj", -2.0f);
+		
+		
+		
+		
 		if (time < introTime) {
 			//System.out.println(time);
 			time += 1.0f / fps;
