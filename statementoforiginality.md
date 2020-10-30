@@ -3,8 +3,8 @@
 
 Unless otherwise stated this code is entirely our work. 
 + Xiran Yan u7167582
-+ member 2 name and uni id (delete if not needed)
-+ member 3 name and uni id (delete if not needed)
++ Jaryd Sartori u5799628
++ Mischa Rippon u5643034
 
 Each member of the group should individually add and commit their name here as a signature of the above statement.  The last person can remove this comment. 
 

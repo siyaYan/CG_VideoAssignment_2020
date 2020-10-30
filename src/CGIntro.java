@@ -351,9 +351,9 @@ public class CGIntro implements GLEventListener {
 	}
 
 	/**
-	 * using glusphere draw a simple sphere
-	 * @auther: Xiran Yan(Siya)
-	 * @uid: u7167582
+	 * using obj, draw fruit to display same as letters
+	 * @auther: Jaryd Sartori
+	 * @uid: u5799628
 	 */
 	public void drawFruits(GL2 gl2, GLU glu, GLUT glut, String file, float xOffset) {
 		gl2.glPushMatrix();
