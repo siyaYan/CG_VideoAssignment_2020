@@ -80,6 +80,27 @@ public class CGIntro implements GLEventListener {
 	//for shadow
 	float groundShadow[] = { 0.0f, 0.0f, -5.0f };
 	float groundnormal[] = { 0.0f, 0.0f, -10.0f };
+	
+	
+	
+//	File list for letters 
+	String letterFileName[] = {"letters/n-1.obj", "letters/i-1.obj", "letters/n-2.obj", "letters/j.obj", "letters/a.obj", "letters/p.obj",
+			"letters/o.obj","letters/r.obj","letters/i-2.obj","letters/u.obj","letters/m.obj"};
+	
+	
+	
+	
+//	drawObj(gl2,glu,glut,, -2.0f);
+//	drawObj(gl2,glu,glut,, -1.6f);
+//	drawObj(gl2,glu,glut,, -1.2f);
+//	drawObj(gl2,glu,glut,, -0.8f);
+//	drawObj(gl2,glu,glut,"letters/a.obj", -0.4f);
+//	drawObj(gl2,glu,glut,"letters/P.obj", -0.0f);
+//	drawObj(gl2,glu,glut,"letters/o.obj", 0.4f);
+//	drawObj(gl2,glu,glut,"letters/r.obj", 0.8f);
+//	drawObj(gl2,glu,glut,"letters/i-2.obj", 1.2f);
+//	drawObj(gl2,glu,glut,"letters/u.obj", 1.6f);
+//	drawObj(gl2,glu,glut,"letters/m.obj", 2.0f);
 
 	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
 		new CGIntro();
@@ -305,7 +326,10 @@ public class CGIntro implements GLEventListener {
 		}
 
 		gl2.glScaled(scale,scale,scale);
-		drawSomething(gl2,glu,glut);
+//		drawSomething(gl2,glu,glut);
+		drawObj(gl2, glu, glut, letterFileName[num], 0.0f);
+		
+		
 		gl2.glPopMatrix();
 
 		gl2.glPushMatrix();
@@ -565,7 +589,7 @@ public class CGIntro implements GLEventListener {
 		for (int i = 0; i < letterNum; i++) {
 			transAndRotateLetters(gl2,glu,glut,i);
 		}
-		drawObj(gl2,glu,glut,"letters/n-1.obj", -2.0f);
+//		transAndRotateLetters(gl2,glu,glut,1);
 		
 		
 		
