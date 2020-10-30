@@ -35,18 +35,20 @@ public class CGIntro implements GLEventListener {
 	GLJPanel gljpanel;
 	Dimension dim = new Dimension(800, 800);
 	FPSAnimator animator;
+
 	float time;
 	static int fps = 20;
 	static float introTime = 120.0f; // 12 seconds
+
+	float lightpos[] = { 2f, 2f, 30f, 1.0f };
+	//size 40*40 pos(0,0,-15)
+	float background[] = { 40.0f, 40.0f, -15.0f };
 	Texture cgtexture;
 	Texture object;
 	Texture test;
 
 	//number of fruit objects
 	int objectNum=10;
-	//number of letters
-	int letterNum=11;
-
 	//parameter for fruit objects
 	int[] rotate= new int[3*objectNum];//rotate true/false for x,y,z(one object have to store 3 boolean state)
 	int[] startposx=new int[objectNum];//from -10 to 10 in x axis
@@ -57,21 +59,21 @@ public class CGIntro implements GLEventListener {
 	int[] starttime=new int[objectNum];//0-10(10 types)
 	boolean rote=false;
 
+	//setting noraml speed for direction and rotation(can be change be random parameters)
 	float xSpeed=8;
 	float zSpeed=6;
 	float rotateSpeed=5;
 
+	//number of letters
+	int letterNum=11;
 	//parameters for letters
 	int[] speedLetter=new int[letterNum];//0,1(2 types: nomal/fast)
 	int[] startTimeLetter=new int[letterNum];//0-2(3 types)
 
+	//setting start/stop position of letters and rotate speed
 	float[] startPosLetter={-6.25f,-5f,-3.75f,-2.5f,-1.25f,0f,1.25f,2.5f,3.75f,5f,6.25f};//11 letter in x axis
-	float stopPos=4;//letters stop position(screen can see 10 to -10 in both x & y axis)
-	float rotateLetters=4;//rotate times for letters
-
-	float lightpos[] = { 2f, 2f, 30f, 1.0f };
-	//size 40*40 pos(0,0,-15)
-	float background[] = { 40.0f, 40.0f, -15.0f };
+	float stopPosLetters=4;//letters stop position(screen can see 10 to -10 in both x & y axis)
+	float rotateLetters=4;//rotate speed for letters
 
 	//for shadow
 	float groundShadow[] = { 0.0f, 0.0f, -5.0f };
@@ -291,12 +293,12 @@ public class CGIntro implements GLEventListener {
 		//if it's not your turn stay in the pos (0,20,0)
 		if (speedDown < 0) {
 			gl2.glTranslatef(0,20,0.0f);
-		} else if (position>stopPos) {
+		} else if (position>stopPosLetters) {
 			gl2.glTranslatef(startPosLetter[num], (10.0f) - (speedDown), 0);
 			//every second rotate 360 with z axis
 			gl2.glRotatef(360.0f * (rotation), 0f, 1f, 0f);
 		} else {
-			gl2.glTranslatef(startPosLetter[num], stopPos, 0);//every second rotate 180 with z axis
+			gl2.glTranslatef(startPosLetter[num], stopPosLetters, 0);//every second rotate 180 with z axis
 			//gl2.glRotatef(180.0f * (rotation), 0f, 1f, 0f);
 		}
 
@@ -308,10 +310,10 @@ public class CGIntro implements GLEventListener {
 		//if it's not your turn stay in the pos (0,20,0)
 		if (speedDown < 0) {
 			gl2.glTranslatef(0,20,0.0f);
-		} else if (position>stopPos) {
+		} else if (position>stopPosLetters) {
 			gl2.glTranslatef(startPosLetter[num], (10.0f) - (speedDown), 0);
 		} else {
-			gl2.glTranslatef(startPosLetter[num], stopPos, 0);
+			gl2.glTranslatef(startPosLetter[num], stopPosLetters, 0);
 		}
 		gl2.glScaled(scale,scale,scale);
 		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);

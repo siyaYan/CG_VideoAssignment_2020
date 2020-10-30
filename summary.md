@@ -6,27 +6,38 @@ A program for Youtube (Ninja) channel introduction video,which contains a Scene 
 
 # Functions:
 
-+ Randomly produce various parameters.(start_position/falling_direction/falling_speed/rotate_speed)
++ Randomly produce various parameters for fruits and letters.
+1.  Fruits: start_position/falling_direction/falling_speed/rotate_speed
+2.  Letters: letterSpeed/letterStartTime
 + play background music.
 + create watermelons,oranges,and apples.(Blender)
 + create channel letters.(Blender)
 + import blender object into OpenGl.
 + draw blender object by OpenGl.
-+ various objects falling down in different ways.
-+ channel letters fall down and then suspend in the midair.
++ various objects falling down with rotation in different methods.
++ channel letters falling down with rotation and then suspend in the midair.
 
 # Details:(add more details)
 
 +   using javax.sound to obtain audio stream and play the music.
 
 +   these parameters are not randomly but are changable in the setting:
-1.  objectNum(number of obejcts)
-2.  xSpeed/zSpeed(speed in x&z axis)
-3.  rotateSpeed(speed of rotation)
+
+Fruits:
+1.  objectNum (number of obejcts)
+2.  xSpeed/zSpeed (speed in x&z axis)
+3.  rotateSpeed (speed of rotation)
 4.  lightpos[] (position of light)
 5.  background[] (position of background)
 
+Letters:
+1.  startPosLetters (11 letters' position in x axis)
+2.  stopPosLetters (letters stop position)
+3.  rotateLetters (rotate speed for letters)
+
 +   randomly parameters are as following:
+
+Fruits:
 1.  startposx&startposz - objects start from which position (can start from -10 to 10 in x axis& -1 to 1 in z axis)
 (notice: position in y axis is fixed at the begining) 
 2.  rotate - rotation options for x,y,z axis(rotate true/false for x,y,z)
@@ -34,6 +45,10 @@ A program for Youtube (Ninja) channel introduction video,which contains a Scene 
 (notice: direction about y is fixed) 
 4.	speed - 3 types of falling down speed (slow/nomal/fast)
 5.	starttime - when do the object start falling?(from 0-10 secends)
+
+Letters:
+1.  speedLetter - the speed of letters falling down (2 types: nomal/fast)
+2.  startTimeLetter - when is the letter start falling (3 types  start from 0,1,2 second)
 
 # Design process:
 
