@@ -81,6 +81,6 @@ Letters:
     +   run the program several times to test the randomly parameters and different outcomes
 
 # Notice:
-+   if you can't use the makefile(written jogl jar in our path), use makefile_original((original_path) alternatively!
++   if you can't use the makefile(original_path written by Eric), use makefile_local(jogl jar in our path) alternatively!
  Because don't know the makefile testing will use jogl in our file path or not.
 
