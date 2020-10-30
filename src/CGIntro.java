@@ -48,9 +48,10 @@ public class CGIntro implements GLEventListener {
 	Texture object;
 	Texture test;
 	Texture ninjatextures;
+	Texture fruittextures;
 
 	//number of fruit objects
-	int objectNum=10;
+	int objectNum=3;
 	//parameter for fruit objects
 	int[] rotate= new int[3*objectNum];//rotate true/false for x,y,z(one object have to store 3 boolean state)
 	int[] startposx=new int[objectNum];//from -10 to 10 in x axis
@@ -69,6 +70,8 @@ public class CGIntro implements GLEventListener {
 	//	File list for letters
 	String letterFileName[] = {"src/letters/n-1.obj", "src/letters/i-1.obj", "src/letters/n-2.obj", "src/letters/j.obj", "src/letters/a.obj", "src/letters/p.obj",
 			"src/letters/o.obj","src/letters/r.obj","src/letters/i-2.obj","src/letters/u.obj","src/letters/m.obj"};
+	
+	String fruitFileName[] = {"src/fruit/Apple1.obj", "src/fruit/Watermelon1.obj", "src/fruit/Orange1.obj"};
 	//number of letters
 	int letterNum= letterFileName.length;
 	//parameters for letters
@@ -260,7 +263,8 @@ public class CGIntro implements GLEventListener {
 		//every rotateSpeed *(time / introTime) rotate half_circle
 		gl2.glRotatef(180.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
 		gl2.glScaled(scale,scale,scale);
-		drawSphere(gl2,glu,glut);
+//		drawSphere(gl2,glu,glut);
+		drawFruits(gl2, glu, glut, fruitFileName[num], 0.0f);
 		gl2.glPopMatrix();
 
 		gl2.glPushMatrix();
@@ -358,18 +362,47 @@ public class CGIntro implements GLEventListener {
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
 	 */
-	public void drawSphere(GL2 gl2, GLU glu, GLUT glut) {
+	public void drawFruits(GL2 gl2, GLU glu, GLUT glut, String file, float xOffset) {
 		gl2.glPushMatrix();
-		object.bind(gl2);
+		gl2.glScalef(2.0f, 2.0f, 2.0f);
+//		xOffset aligns each letter consecutively based off manual refinement
+		gl2.glTranslatef(xOffset, 0.0f, 0.0f);
+	
+		Vector<float[]> verts = new Vector<float[]>();
+		Vector<float[]> uvs = new Vector<float[]>();
+		Vector<float[]> norms = new Vector<float[]>();
+		System.out.println(file.split("/")[1]);
+		Mesh.loadObjModel(file, verts, uvs, norms);
+		fruittextures.bind(gl2);
+		
+
+
+		
+		
 		gl2.glEnable(GL2.GL_TEXTURE_2D);
-		GLUquadric sphere=glu.gluNewQuadric();
-		glu.gluQuadricDrawStyle(sphere,GLU.GLU_FILL);
-		glu.gluQuadricTexture(sphere, true);
-		glu.gluQuadricNormals(sphere, GLU.GLU_SMOOTH);
-		glu.gluSphere(sphere,0.5,50,50);
+		gl2.glBegin(GL2.GL_TRIANGLES);
+		for (int i = 0; i < verts.size(); i++) {
+			if(i%3 == 0) { 			
+//				first vertex normal, vertex, uv
+				gl2.glNormal3f(norms.get(i)[0], norms.get(i)[1], norms.get(i)[2]);
+				gl2.glVertex3f(verts.get(i)[0], verts.get(i)[1], verts.get(i)[2]);
+				gl2.glTexCoord2f(uvs.get(i)[0], uvs.get(i)[1]);
+//				second vertex normal, vertex, uv
+				gl2.glNormal3f(norms.get(i+1)[0], norms.get(i+1)[1], norms.get(i+1)[2]);
+				gl2.glVertex3f(verts.get(i+1)[0], verts.get(i+1)[1], verts.get(i+1)[2]);
+				gl2.glTexCoord2f(uvs.get(i+1)[0], uvs.get(i+1)[1]);
+//				third vertex: normal, vertex, uv
+				gl2.glNormal3f(norms.get(i+2)[0], norms.get(i+2)[1], norms.get(i+2)[2]);
+				gl2.glVertex3f(verts.get(i+2)[0], verts.get(i+2)[1], verts.get(i+2)[2]);
+				gl2.glTexCoord2f(uvs.get(i+2)[0], uvs.get(i+2)[1]);
+				
+			}
+		
+		}
+		gl2.glDisable(GL2.GL_TEXTURE_2D);
+		gl2.glEnd();
 		gl2.glPopMatrix();
 	}
-
 	/**
 	 * test something
 	 * @auther: Xiran Yan(Siya)
@@ -402,10 +435,11 @@ public class CGIntro implements GLEventListener {
 		Vector<float[]> verts = new Vector<float[]>();
 		Vector<float[]> uvs = new Vector<float[]>();
 		Vector<float[]> norms = new Vector<float[]>();
-
+		System.out.println(file.split("/")[1]);
 		Mesh.loadObjModel(file, verts, uvs, norms);
 
 		ninjatextures.bind(gl2);
+
 		gl2.glEnable(GL2.GL_TEXTURE_2D);
 		gl2.glBegin(GL2.GL_TRIANGLES);
 		for (int i = 0; i < verts.size(); i++) {
@@ -578,10 +612,12 @@ public class CGIntro implements GLEventListener {
 			backgroundtexture = TextureIO.newTexture(new File("src/images/backgound.jpg"), true);
 			object = TextureIO.newTexture(new File("src/images/strawberry_2.jpg"), true);
 			ninjatextures = TextureIO.newTexture(new File("src/images/ninjatextures.jpeg"), true);
-
+			fruittextures = TextureIO.newTexture(new File("src/images/fruittextures.png"), true);
+			
 			object.enable(gl2);
 			backgroundtexture.enable(gl2);
 			ninjatextures.enable(gl2);
+			fruittextures.enable(gl2);
 		} catch (GLException | IOException e) {
 			e.printStackTrace();
 		}
