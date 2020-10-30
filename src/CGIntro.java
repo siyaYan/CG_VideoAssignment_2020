@@ -84,8 +84,8 @@ public class CGIntro implements GLEventListener {
 
 
 //	File list for letters
-	String letterFileName[] = {"letters/n-1.obj", "letters/i-1.obj", "letters/n-2.obj", "letters/j.obj", "letters/a.obj", "letters/p.obj",
-			"letters/o.obj","letters/r.obj","letters/i-2.obj","letters/u.obj","letters/m.obj"};
+	String letterFileName[] = {"src/letters/n-1.obj", "src/letters/i-1.obj", "src/letters/n-2.obj", "src/letters/j.obj", "src/letters/a.obj", "src/letters/p.obj",
+			"src/letters/o.obj","src/letters/r.obj","src/letters/i-2.obj","src/letters/u.obj","src/letters/m.obj"};
 
 
 
@@ -432,14 +432,11 @@ public class CGIntro implements GLEventListener {
 			}
 		
 		}
-		
 		gl2.glDisable(GL2.GL_TEXTURE_2D);
 		gl2.glEnd();
 		gl2.glPopMatrix();
 		
 	}
-	
-	
 
 	/**
 	 * disable bind and draw sphere shadow
@@ -587,10 +584,7 @@ public class CGIntro implements GLEventListener {
 			transAndRotateLetters(gl2,glu,glut,i);
 		}
 
-		
-		
-		
-		
+
 		if (time < introTime) {
 			//System.out.println(time);
 			time += 1.0f / fps;

@@ -2,7 +2,7 @@
 
 # Overall:
 
-A program for Youtube (Ninja) channel introduction video,which contains a Scene that watermelons,oranges,apples can randomly falling down with music.
+A program for Youtube Ninjaporium channel introduction video,which contains a Scene that watermelons,oranges,apples can randomly falling down with music.
 
 # Functions:
 
