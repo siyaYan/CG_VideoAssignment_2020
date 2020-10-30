@@ -71,7 +71,7 @@ public class CGIntro implements GLEventListener {
 	String letterFileName[] = {"src/letters/n-1.obj", "src/letters/i-1.obj", "src/letters/n-2.obj", "src/letters/j.obj", "src/letters/a.obj", "src/letters/p.obj",
 			"src/letters/o.obj","src/letters/r.obj","src/letters/i-2.obj","src/letters/u.obj","src/letters/m.obj"};
 	
-	String fruitFileName[] = {"src/fruit/Apple.obj", "src/fruit/Watermelon.obj", "src/fruit/Orange.obj"};
+	String fruitFileName[] = {"src/fruit/Apple.obj", "src/fruit/Watermelon1.obj", "src/fruit/Orange.obj"};
 	//number of letters
 	int letterNum= letterFileName.length;
 	//parameters for letters
