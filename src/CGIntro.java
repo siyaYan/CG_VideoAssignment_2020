@@ -51,14 +51,14 @@ public class CGIntro implements GLEventListener {
 	Texture fruittextures;
 
 	//	File list for fruits
-	String fruitFileName[] = {"src/fruit/Apple1.obj", "src/fruit/Watermelon1.obj", "src/fruit/Orange1.obj",
-			"src/fruit/Apple1.obj","src/fruit/Watermelon1.obj","src/fruit/Orange1.obj",
-			"src/fruit/Apple1.obj", "src/fruit/Watermelon1.obj", "src/fruit/Orange1.obj",
-			"src/fruit/Apple1.obj", "src/fruit/Watermelon1.obj", "src/fruit/Orange1.obj",
-			"src/fruit/Apple1.obj", "src/fruit/Watermelon1.obj", "src/fruit/Orange1.obj"};
-	//number of fruit objects
+	String fruitFileName[] = {"src/fruits/Apple.obj", "src/fruits/Watermelon1.obj", "src/fruits/Orange.obj",
+			"src/fruits/Apple.obj","src/fruits/Watermelon1.obj","src/fruits/Orange.obj",
+			"src/fruits/Apple.obj", "src/fruits/Watermelon1.obj", "src/fruits/Orange.obj",
+			"src/fruits/Apple.obj", "src/fruits/Watermelon1.obj", "src/fruits/Orange.obj",
+			"src/fruits/Apple.obj", "src/fruits/Watermelon1.obj", "src/fruits/Orange.obj"};
+	//number of fruits objects
 	int objectNum=fruitFileName.length;
-	//parameter for fruit objects
+	//parameter for fruits objects
 	int[] rotate= new int[3*objectNum];//rotate true/false for x,y,z(one object have to store 3 boolean state)
 	int[] startposx=new int[objectNum];//from -10 to 10 in x axis
 	int[] startposz=new int[objectNum];//from -1/0/1 to chose start pos in z axis
@@ -598,15 +598,15 @@ public class CGIntro implements GLEventListener {
 		gl2.glLightfv(GL2.GL_LIGHT2, GL2.GL_DIFFUSE, new float[]{ 0.7f, 0.7f, 0.7f, 1.0f }, 0);
 		gl2.glLightfv(GL2.GL_LIGHT2,GL2.GL_SPECULAR, new float[]{ 0.6f, 0.6f, 0.6f, 1.0f },0);
 		gl2.glLightfv(GL2.GL_LIGHT2, GL2.GL_POSITION, lightpos, 0);
-		gl2.glEnable(GL2.GL_LIGHT2);
+		//gl2.glEnable(GL2.GL_LIGHT2);
 
 		try {
 			backgroundtexture = TextureIO.newTexture(new File("src/images/backgound.jpg"), true);
-			object = TextureIO.newTexture(new File("src/images/strawberry_2.jpg"), true);
+			//object = TextureIO.newTexture(new File("src/images/strawberry_2.jpg"), true);
 			ninjatextures = TextureIO.newTexture(new File("src/images/ninjatextures.jpeg"), true);
 			fruittextures = TextureIO.newTexture(new File("src/images/fruittextures.png"), true);
 			
-			object.enable(gl2);
+			//object.enable(gl2);
 			backgroundtexture.enable(gl2);
 			ninjatextures.enable(gl2);
 			fruittextures.enable(gl2);
