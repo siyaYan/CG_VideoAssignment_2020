@@ -43,7 +43,7 @@ public class CGIntro implements GLEventListener {
 
 	float lightpos[] = { 2f, 2f, 30f, 1.0f };
 	//size 40*40 pos(0,0,-15)
-	float background[] = { 40.0f, 40.0f, -15.0f };
+	float background[] = { 40.0f, 40.0f, -10.0f };
 	Texture backgroundtexture;
 	Texture object;
 	Texture test;
@@ -89,7 +89,7 @@ public class CGIntro implements GLEventListener {
 	float rotateLetters=4;//rotate speed for letters
 
 	//for shadow
-	float groundShadow[] = { 0.0f, 0.0f, -13.0f };
+	float groundShadow[] = { 0.0f, 0.0f, -8.0f };
 	float groundnormal[] = { 0.0f, 0.0f, -10.0f };
 
 
@@ -267,8 +267,6 @@ public class CGIntro implements GLEventListener {
 		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
 		gl2.glDisable(GL2.GL_LIGHTING);
 		gl2.glPolygonOffset(-0.5f, -0.5f);
-		float[] rgb=Color.darkGray.getColorComponents(null);
-		gl2.glColor3d(rgb[0],rgb[1],rgb[2]);
 		projectShadow(gl2, groundShadow, groundnormal, lightpos);
 		//if it's not your turn stay in the pos (0,20,0)
 		if (speedDown < 0) {
@@ -328,8 +326,6 @@ public class CGIntro implements GLEventListener {
 		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
 		gl2.glDisable(GL2.GL_LIGHTING);
 		gl2.glPolygonOffset(-0.5f, -0.5f);
-		float[] rgb=Color.darkGray.getColorComponents(null);
-		gl2.glColor3d(rgb[0],rgb[1],rgb[2]);
 		projectShadow(gl2, groundShadow, groundnormal, lightpos);
 		//if it's not your turn stay in the pos (0,20,0)
 		if (speedDown < 0) {
@@ -368,7 +364,6 @@ public class CGIntro implements GLEventListener {
 		Vector<float[]> verts = new Vector<float[]>();
 		Vector<float[]> uvs = new Vector<float[]>();
 		Vector<float[]> norms = new Vector<float[]>();
-		System.out.println(file.split("/")[1]);
 		Mesh.loadObjModel(file, verts, uvs, norms);
 		fruittextures.bind(gl2);
 
@@ -428,7 +423,6 @@ public class CGIntro implements GLEventListener {
 		Vector<float[]> verts = new Vector<float[]>();
 		Vector<float[]> uvs = new Vector<float[]>();
 		Vector<float[]> norms = new Vector<float[]>();
-		System.out.println(file.split("/")[1]);
 		Mesh.loadObjModel(file, verts, uvs, norms);
 
 		ninjatextures.bind(gl2);
@@ -482,6 +476,8 @@ public class CGIntro implements GLEventListener {
 	 */
 	public void drawShadow(GL2 gl2, GLU glu, GLUT glut,String file) {
 		gl2.glPushMatrix();
+		float[] rgb=Color.black.getColorComponents(null);
+		gl2.glColor3d(rgb[0],rgb[1],rgb[2]);
 		gl2.glScalef(2.0f, 2.0f, 2.0f);
 
 		Vector<float[]> verts = new Vector<float[]>();
@@ -589,9 +585,12 @@ public class CGIntro implements GLEventListener {
 		gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_AMBIENT, new float[]{ 1f, 1f,1f, 1.0f }, 0);
 		gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, new float[]{0,0,0}, 0);
 		gl2.glEnable(GL2.GL_LIGHT0);
-		gl2.glLightfv(GL2.GL_LIGHT1, GL2.GL_AMBIENT, new float[]{ 0.3f, 0.3f,0.3f, 1.0f }, 0);
-		gl2.glLightfv(GL2.GL_LIGHT1, GL2.GL_DIFFUSE, new float[]{ 0.7f, 0.7f, 0.7f, 1.0f }, 0);
-		gl2.glLightfv(GL2.GL_LIGHT1,GL2.GL_SPECULAR, new float[]{ 0.6f, 0.6f, 0.6f, 1.0f },0);
+		gl2.glLightfv(GL2.GL_LIGHT3, GL2.GL_AMBIENT, new float[]{ 0.5f, 0.5f, 0.5f, 1.0f }, 0);
+		gl2.glLightfv(GL2.GL_LIGHT3, GL2.GL_POSITION, new float[]{0,0,0}, 0);
+		gl2.glEnable(GL2.GL_LIGHT3);
+		gl2.glLightfv(GL2.GL_LIGHT1, GL2.GL_AMBIENT, new float[]{ 0.1f, 0.1f,0.1f, 1.0f }, 0);
+		gl2.glLightfv(GL2.GL_LIGHT1, GL2.GL_DIFFUSE, new float[]{ 0.5f, 0.5f, 0.5f, 1.0f }, 0);
+		gl2.glLightfv(GL2.GL_LIGHT1,GL2.GL_SPECULAR, new float[]{ 0.7f, 0.7f, 0.6f, 1.0f },0);
 		gl2.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION, lightpos, 0);
 		gl2.glEnable(GL2.GL_LIGHT1);
 		gl2.glLightfv(GL2.GL_LIGHT2, GL2.GL_AMBIENT, new float[]{ 0.3f, 0.3f,0.3f, 1.0f }, 0);
@@ -601,12 +600,10 @@ public class CGIntro implements GLEventListener {
 		//gl2.glEnable(GL2.GL_LIGHT2);
 
 		try {
-			backgroundtexture = TextureIO.newTexture(new File("src/images/backgound.jpg"), true);
-			//object = TextureIO.newTexture(new File("src/images/strawberry_2.jpg"), true);
+			backgroundtexture = TextureIO.newTexture(new File("src/images/3.jpg"), true);
 			ninjatextures = TextureIO.newTexture(new File("src/images/ninjatextures.jpeg"), true);
 			fruittextures = TextureIO.newTexture(new File("src/images/fruittextures.png"), true);
-			
-			//object.enable(gl2);
+
 			backgroundtexture.enable(gl2);
 			ninjatextures.enable(gl2);
 			fruittextures.enable(gl2);
