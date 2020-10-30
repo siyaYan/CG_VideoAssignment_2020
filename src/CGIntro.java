@@ -50,8 +50,14 @@ public class CGIntro implements GLEventListener {
 	Texture ninjatextures;
 	Texture fruittextures;
 
+	//	File list for fruits
+	String fruitFileName[] = {"src/fruit/Apple1.obj", "src/fruit/Watermelon1.obj", "src/fruit/Orange1.obj",
+			"src/fruit/Apple1.obj","src/fruit/Watermelon1.obj","src/fruit/Orange1.obj",
+			"src/fruit/Apple1.obj", "src/fruit/Watermelon1.obj", "src/fruit/Orange1.obj",
+			"src/fruit/Apple1.obj", "src/fruit/Watermelon1.obj", "src/fruit/Orange1.obj",
+			"src/fruit/Apple1.obj", "src/fruit/Watermelon1.obj", "src/fruit/Orange1.obj"};
 	//number of fruit objects
-	int objectNum=3;
+	int objectNum=fruitFileName.length;
 	//parameter for fruit objects
 	int[] rotate= new int[3*objectNum];//rotate true/false for x,y,z(one object have to store 3 boolean state)
 	int[] startposx=new int[objectNum];//from -10 to 10 in x axis
@@ -65,13 +71,12 @@ public class CGIntro implements GLEventListener {
 	//setting noraml speed for direction and rotation(can be change be random parameters)
 	float xSpeed=8;
 	float zSpeed=6;
-	float rotateSpeed=5;
+	float rotateSpeed=6;
 
 	//	File list for letters
 	String letterFileName[] = {"src/letters/n-1.obj", "src/letters/i-1.obj", "src/letters/n-2.obj", "src/letters/j.obj", "src/letters/a.obj", "src/letters/p.obj",
 			"src/letters/o.obj","src/letters/r.obj","src/letters/i-2.obj","src/letters/u.obj","src/letters/m.obj"};
-	
-	String fruitFileName[] = {"src/fruit/Apple1.obj", "src/fruit/Watermelon1.obj", "src/fruit/Orange1.obj"};
+
 	//number of letters
 	int letterNum= letterFileName.length;
 	//parameters for letters
@@ -84,18 +89,9 @@ public class CGIntro implements GLEventListener {
 	float rotateLetters=4;//rotate speed for letters
 
 	//for shadow
-	float groundShadow[] = { 0.0f, 0.0f, -5.0f };
+	float groundShadow[] = { 0.0f, 0.0f, -13.0f };
 	float groundnormal[] = { 0.0f, 0.0f, -10.0f };
 
-	String appleOBJ = "src/OBJs/AppleTri.obj";
-	String appleMTL = "src/OBJs/AppleTri.mtl";
-	String orangeOBJ = "src/OBJs/OrangeTri.obj";
-	String orangeMTL = "src/OBJs/OrangeTri.mtl";
-	String watermelonOBJ = "src/OBJs/WatermelonTri.obj";
-	String watermelonMTL = "src/OBJs/WatermelonTri.mtl";
-	Vector<float[]> verts;
-	Vector<float[]> uvs;
-	Vector<float[]> normals;
 
 	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
 		new CGIntro();
@@ -263,11 +259,17 @@ public class CGIntro implements GLEventListener {
 		//every rotateSpeed *(time / introTime) rotate half_circle
 		gl2.glRotatef(180.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
 		gl2.glScaled(scale,scale,scale);
-//		drawSphere(gl2,glu,glut);
 		drawFruits(gl2, glu, glut, fruitFileName[num], 0.0f);
 		gl2.glPopMatrix();
 
 		gl2.glPushMatrix();
+		gl2.glScaled(scale,scale,scale);
+		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
+		gl2.glDisable(GL2.GL_LIGHTING);
+		gl2.glPolygonOffset(-0.5f, -0.5f);
+		float[] rgb=Color.darkGray.getColorComponents(null);
+		gl2.glColor3d(rgb[0],rgb[1],rgb[2]);
+		projectShadow(gl2, groundShadow, groundnormal, lightpos);
 		//if it's not your turn stay in the pos (0,20,0)
 		if (speedDown < 0) {
 			gl2.glTranslatef(0,20,0.0f);
@@ -275,17 +277,11 @@ public class CGIntro implements GLEventListener {
 		else {
 			gl2.glTranslatef(startposx[num]+(speedLeftOrRight*directx[num]), (10.0f)-(speedDown), startposz[num]+(speedBackOrFront*directz[num]));
 		}
-		gl2.glScaled(scale,scale,scale);
-		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
-		gl2.glDisable(GL2.GL_LIGHTING);
-		gl2.glPolygonOffset(-0.5f, -0.5f);
-		gl2.glPushMatrix();
-		float[] rgb=Color.darkGray.getColorComponents(null);
-		gl2.glColor3d(rgb[0],rgb[1],rgb[2]);
-		projectShadow(gl2, groundShadow, groundnormal, lightpos);
-		//gl2.glColor3d(1,0,0);
-		//drawShadow(gl2,glu,glut);
-		gl2.glPopMatrix();
+		gl2.glRotatef(180.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
+		fruittextures.disable(gl2);
+		gl2.glScalef(0.25f, 0.25f, 0.25f);
+		drawShadow(gl2, glu, glut,fruitFileName[num]);
+		fruittextures.enable(gl2);
 		gl2.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
 		gl2.glEnable(GL2.GL_LIGHTING);
 		gl2.glPopMatrix();
@@ -306,7 +302,7 @@ public class CGIntro implements GLEventListener {
 		//falling down speed(20,30)-starttime(0-3)
 		float speedDown = (speedLetter[num]*10+20)*(time / introTime)-startTimeLetter[num];//falling down routine
 		float position = 10f-speedDown;//position now
-		float rotation = rotateLetters*(time / introTime);//rotate letters
+		float rotation = rotateLetters* (time / introTime);//rotate letters
 
 		gl2.glPushMatrix();
 		//if it's not your turn stay in the pos (0,20,0)
@@ -323,33 +319,34 @@ public class CGIntro implements GLEventListener {
 
 		gl2.glScaled(scale,scale,scale);
 
-		drawObj(gl2, glu, glut, letterFileName[num], 0.0f);
+		drawLetters(gl2, glu, glut, letterFileName[num], 0.0f);
 
 		gl2.glPopMatrix();
 
 		gl2.glPushMatrix();
+		gl2.glScaled(scale,scale,scale);
+		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
+		gl2.glDisable(GL2.GL_LIGHTING);
+		gl2.glPolygonOffset(-0.5f, -0.5f);
+		float[] rgb=Color.darkGray.getColorComponents(null);
+		gl2.glColor3d(rgb[0],rgb[1],rgb[2]);
+		projectShadow(gl2, groundShadow, groundnormal, lightpos);
 		//if it's not your turn stay in the pos (0,20,0)
 		if (speedDown < 0) {
 			gl2.glTranslatef(0,20,0.0f);
 		} else if (position>stopPosLetters) {
 			gl2.glTranslatef(startPosLetter[num], (10.0f) - (speedDown), 0);
+			gl2.glRotatef(360.0f * (rotation), 0f, 1f, 0f);
 		} else {
 			gl2.glTranslatef(startPosLetter[num], stopPosLetters, 0);
 		}
-		gl2.glScaled(scale,scale,scale);
-		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
-		gl2.glDisable(GL2.GL_LIGHTING);
-		gl2.glPolygonOffset(-0.5f, -0.5f);
-		gl2.glPushMatrix();
-		float[] rgb=Color.darkGray.getColorComponents(null);
-		gl2.glColor3d(rgb[0],rgb[1],rgb[2]);
-		projectShadow(gl2, groundShadow, groundnormal, lightpos);
-		//gl2.glColor3d(1,0,0);
-		drawLetterShadow(gl2, glu, glut, letterFileName[num]);
-		gl2.glPopMatrix();
+		ninjatextures.disable(gl2);
+		drawShadow(gl2, glu, glut, letterFileName[num]);
+		ninjatextures.enable(gl2);
 		gl2.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
 		gl2.glEnable(GL2.GL_LIGHTING);
 		gl2.glPopMatrix();
+
 		//time change from 0.0 to 99.95, every step increase 0.05
 		if (time < introTime) {
 			//System.out.println(time);
@@ -400,11 +397,11 @@ public class CGIntro implements GLEventListener {
 		gl2.glPopMatrix();
 	}
 	/**
-	 * test something
+	 * test draw something
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
 	 */
-	public void drawSomething(GL2 gl2, GLU glu, GLUT glut) {
+/*	public void drawSomething(GL2 gl2, GLU glu, GLUT glut) {
 		gl2.glPushMatrix();
 		test.bind(gl2);
 		gl2.glEnable(GL2.GL_TEXTURE_2D);
@@ -415,14 +412,14 @@ public class CGIntro implements GLEventListener {
 		glu.gluSphere(some,0.5,50,50);
 		//glu.gluCylinder(some,1,1,1,1,1);
 		gl2.glPopMatrix();
-	}
+	}*/
 	
 	/**
-	 * drawObj - uses vector data and triangle indicies to map textures and verticies to buffer for displaying .obj imported objects.
+	 * drawLetters - uses vector data and triangle indicies to map textures and verticies to buffer for displaying .obj imported objects.
 	 * @auther:Jaryd Sartori
 	 * @uid: u5799628
 	 */
-	public void drawObj(GL2 gl2, GLU glu, GLUT glut, String file, float xOffset) { 
+	public void drawLetters(GL2 gl2, GLU glu, GLUT glut, String file, float xOffset) {
 		gl2.glPushMatrix();
 		gl2.glScalef(2.0f, 2.0f, 2.0f);
 //		xOffset aligns each letter consecutively based off manual refinement
@@ -479,12 +476,11 @@ public class CGIntro implements GLEventListener {
 	}*/
 
 	/**
-	 * disable bind and draw letters shadow
+	 * disable bind and draw letters&fruits shadow
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
 	 */
-	public void drawLetterShadow(GL2 gl2, GLU glu, GLUT glut,String file) {
-		ninjatextures.disable(gl2);
+	public void drawShadow(GL2 gl2, GLU glu, GLUT glut,String file) {
 		gl2.glPushMatrix();
 		gl2.glScalef(2.0f, 2.0f, 2.0f);
 
@@ -509,8 +505,8 @@ public class CGIntro implements GLEventListener {
 		}
 		gl2.glEnd();
 		gl2.glPopMatrix();
-		ninjatextures.enable(gl2);
 	}
+
 
 	/**
 	 * bind texture and draw the background
@@ -640,7 +636,6 @@ public class CGIntro implements GLEventListener {
 		for (int i = 0; i < letterNum; i++) {
 			transAndRotateLetters(gl2,glu,glut,i);
 		}
-
 
 		if (time < introTime) {
 			//System.out.println(time);
