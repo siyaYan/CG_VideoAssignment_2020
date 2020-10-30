@@ -37,14 +37,17 @@ public class CGIntro implements GLEventListener {
 	FPSAnimator animator;
 	float time;
 	static int fps = 20;
-	static float introTime = 100.0f; // seconds
+	static float introTime = 120.0f; // 12 seconds
 	Texture cgtexture;
 	Texture object;
+	Texture test;
 
-	//number of objects
+	//number of fruit objects
 	int objectNum=10;
+	//number of letters
+	int letterNum=11;
 
-	//we have more than one objects for the following natures
+	//parameter for fruit objects
 	int[] rotate= new int[3*objectNum];//rotate true/false for x,y,z(one object have to store 3 boolean state)
 	int[] startposx=new int[objectNum];//from -10 to 10 in x axis
 	int[] startposz=new int[objectNum];//from -1/0/1 to chose start pos in z axis
@@ -53,9 +56,17 @@ public class CGIntro implements GLEventListener {
 	int[] speed=new int[objectNum];//-1,0,1(3 types: slow/nomal/fast)
 	int[] starttime=new int[objectNum];//0-10(10 types)
 	boolean rote=false;
+
 	float xSpeed=8;
 	float zSpeed=6;
 	float rotateSpeed=5;
+
+	//parameters for letters
+	int[] speedLetter=new int[letterNum];//0,1(2 types: nomal/fast)
+	int[] startTimeLetter=new int[letterNum];//0-2(3 types)
+
+	float[] startPosLetter={-6.25f,-5f,-3.75f,-2.5f,-1.25f,0f,1.25f,2.5f,3.75f,5f,6.25f};//11 letter in x axis
+	float stopPos=4;//letters stop position(screen can see 10 to -10 in both x & y axis)
 
 	float lightpos[] = { 2f, 2f, 30f, 1.0f };
 	//size 40*40 pos(0,0,-15)
@@ -98,12 +109,11 @@ public class CGIntro implements GLEventListener {
 	}
 
 	/**
-	 * Random algorithms:(for one object, totally have 10)
+	 * Random algorithms:(for [objectNum] fruits have 7 parameters each)
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
-	 * 3 options (1,0,-1) represent 3 types
 	 */
-	public void Random(int num) {
+	public void randomFruits(int num) {
 		rote=false;
 		System.out.println("object "+num+": Random start!");
 		Random rand = new Random();
@@ -121,7 +131,6 @@ public class CGIntro implements GLEventListener {
 		if (!rote) {
 			rotate[num]=1;
 		}
-		System.out.println("rotate:"+rotate[num]+","+rotate[num+1]+","+rotate[num+2]+",");
 
 		//obejct start position(in x/z axis,y axis is fixed)
 		//startposx from -10 to 10 in x axis
@@ -140,8 +149,7 @@ public class CGIntro implements GLEventListener {
 				}
 			}
 		}
-		System.out.println("startposx:"+startposx[num]);
-		System.out.println("startposz:"+startposz[num]);
+
 
 		//object moving direction
 		//random directx/directz from -1 to 1
@@ -165,27 +173,57 @@ public class CGIntro implements GLEventListener {
 		if (startposz[num] > 0) {
 			directz[num]=-1;
 		}
-		System.out.println("directx:"+directx[num]);
-		System.out.println("directz:"+directz[num]);
 
 		//object moving speed
 		// 3 types of speed
 		speed[num]=rand.nextInt(3)-1;//random -1,0,1
-		System.out.println("speed:"+speed[num]);
+
 
 		//object moving start time
 		//start time from 0-9
-		starttime[num]=rand.nextInt(10);//random 1,0,-1
+		starttime[num]=rand.nextInt(10);//random 0-9
+
+		//leave the space for letter falling(letters are just on x axis,z=0)
+		//fruits must be not z=0 And stright falling down But is fine if z=0 and falling down with other direction
+		if (startposz[num] == 0 && directx[num] == 0 && directz[num] == 0) {
+			startposz[num]=1;
+		}
+
+		//print the parameters
+		System.out.println("speed:"+speed[num]);
+		System.out.println("rotate:"+rotate[num]+","+rotate[num+1]+","+rotate[num+2]+",");
+		System.out.println("startposx:"+startposx[num]);
+		System.out.println("startposz:"+startposz[num]);
+		System.out.println("directx:"+directx[num]);
+		System.out.println("directz:"+directz[num]);
 		System.out.println("startTime:"+starttime[num]+"\n");
 	}
 
 	/**
-	 * translation/rotation algorithms
+	 * Random algorithms:(for [letterNum] letters have 2 parameters each,just falling down in different time and speed)
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
 	 */
-	public void transAndRotate(GL2 gl2,GLU glu, GLUT glut,int num) {
-		float scale = 1;
+	public void randomLetters(int num) {
+		System.out.println("letter "+num+": Random start!");
+		Random rand = new Random();
+		//object moving speed
+		// 2 types of speed
+		speedLetter[num]=rand.nextInt(2);//random 0,1
+		System.out.println("speed:"+speedLetter[num]);
+		//object moving start time
+		//start time from 0-2
+		startTimeLetter[num]=rand.nextInt(3);//random 0,1,2
+		System.out.println("startTime:"+startTimeLetter[num]+"\n");
+	}
+
+	/**
+	 * translation/rotation algorithms for fruits
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 */
+	public void transAndRotateFruits(GL2 gl2,GLU glu, GLUT glut,int num) {
+		float scale = 1f;
 		//falling down speed(10,20,30)-starttime(0-9)
 		float speedDown = (speed[num]*10+20)*(time / introTime)-starttime[num];
 		//speed for rotate and to left or right is default
@@ -203,6 +241,7 @@ public class CGIntro implements GLEventListener {
 		}
 		//every second rotate 90
 		gl2.glRotatef(180.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
+		gl2.glScaled(scale,scale,scale);
 		drawSphere(gl2,glu,glut);
 		gl2.glPopMatrix();
 
@@ -214,6 +253,60 @@ public class CGIntro implements GLEventListener {
 		else {
 			gl2.glTranslatef(startposx[num]+(speedLeftOrRight*directx[num]), (10.0f)-(speedDown), startposz[num]+(speedBackOrFront*directz[num]));
 		}
+		gl2.glScaled(scale,scale,scale);
+		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
+		gl2.glDisable(GL2.GL_LIGHTING);
+		gl2.glPolygonOffset(-0.5f, -0.5f);
+		gl2.glPushMatrix();
+		float[] rgb=Color.darkGray.getColorComponents(null);
+		gl2.glColor3d(rgb[0],rgb[1],rgb[2]);
+		projectShadow(gl2, groundShadow, groundnormal, lightpos);
+		//gl2.glColor3d(1,0,0);
+		drawShadow(gl2,glu,glut);
+		gl2.glPopMatrix();
+		gl2.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
+		gl2.glEnable(GL2.GL_LIGHTING);
+		gl2.glPopMatrix();
+		//time change from 0.0 to 99.95, every step increase 0.05
+		if (time < introTime) {
+			//System.out.println(time);
+			time += 1.0f / fps;
+		}
+	}
+
+	/**
+	 * translation/rotation algorithms for letters
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 */
+	public void transAndRotateLetters(GL2 gl2,GLU glu, GLUT glut,int num) {
+		float scale = 1f;
+		//falling down speed(20,30)-starttime(0-3)
+		float speedDown = (speedLetter[num]*10+20)*(time / introTime)-startTimeLetter[num];//falling down routine
+		float position = 10f-speedDown;//position now
+		gl2.glPushMatrix();
+		//if it's not your turn stay in the pos (0,20,0)
+		if (speedDown < 0) {
+			gl2.glTranslatef(0,20,0.0f);
+		} else if (position>stopPos) {
+			gl2.glTranslatef(startPosLetter[num], (10.0f) - (speedDown), 0);
+		} else {
+			gl2.glTranslatef(startPosLetter[num], stopPos, 0);
+		}
+		gl2.glScaled(scale,scale,scale);
+		drawSomething(gl2,glu,glut);
+		gl2.glPopMatrix();
+
+		gl2.glPushMatrix();
+		//if it's not your turn stay in the pos (0,20,0)
+		if (speedDown < 0) {
+			gl2.glTranslatef(0,20,0.0f);
+		} else if (position>stopPos) {
+			gl2.glTranslatef(startPosLetter[num], (10.0f) - (speedDown), 0);
+		} else {
+			gl2.glTranslatef(startPosLetter[num], stopPos, 0);
+		}
+		gl2.glScaled(scale,scale,scale);
 		gl2.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
 		gl2.glDisable(GL2.GL_LIGHTING);
 		gl2.glPolygonOffset(-0.5f, -0.5f);
@@ -238,7 +331,6 @@ public class CGIntro implements GLEventListener {
 	 * using glusphere draw a simple sphere
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
-	 * todo import object build in blender
 	 */
 	public void drawSphere(GL2 gl2, GLU glu, GLUT glut) {
 		gl2.glPushMatrix();
@@ -249,6 +341,24 @@ public class CGIntro implements GLEventListener {
 		glu.gluQuadricTexture(sphere, true);
 		glu.gluQuadricNormals(sphere, GLU.GLU_SMOOTH);
 		glu.gluSphere(sphere,0.5,50,50);
+		gl2.glPopMatrix();
+	}
+
+	/**
+	 * test something
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 */
+	public void drawSomething(GL2 gl2, GLU glu, GLUT glut) {
+		gl2.glPushMatrix();
+		test.bind(gl2);
+		gl2.glEnable(GL2.GL_TEXTURE_2D);
+		GLUquadric some=glu.gluNewQuadric();
+		glu.gluQuadricDrawStyle(some,GLU.GLU_FILL);
+		glu.gluQuadricTexture(some, true);
+		glu.gluQuadricNormals(some, GLU.GLU_SMOOTH);
+		glu.gluSphere(some,0.5,50,50);
+		//glu.gluCylinder(some,1,1,1,1,1);
 		gl2.glPopMatrix();
 	}
 
@@ -300,9 +410,11 @@ public class CGIntro implements GLEventListener {
 	 */
 	public CGIntro() throws IOException, UnsupportedAudioFileException {
 		for (int i = 0; i < objectNum; i++) {
-			Random(i);
+			randomFruits(i);
 		}
-		//Random(0);
+		for (int j = 0; j < letterNum; j++) {
+			randomLetters(j);
+		}
 		jf = new JFrame("CG Intro");
 		profile = GLProfile.getDefault();
 		caps = new GLCapabilities(profile);
@@ -362,6 +474,8 @@ public class CGIntro implements GLEventListener {
 		try {
 			cgtexture = TextureIO.newTexture(new File("src/images/backgound.jpg"), true);
 			object = TextureIO.newTexture(new File("src/images/strawberry_2.jpg"), true);
+			test = TextureIO.newTexture(new File("src/images/background4.jpg"), true);
+			test.enable(gl2);
 			object.enable(gl2);
 			cgtexture.enable(gl2);
 			//cgtextureAspect = ((float) cgtexture.getImageWidth()) / cgtexture.getImageHeight();
@@ -385,10 +499,12 @@ public class CGIntro implements GLEventListener {
 
 		drawBackground(gl2,glu,glut);
 		//10 objects
-		for (int i = 0; i < 10; i++) {
-			transAndRotate(gl2,glu,glut,i);
+		for (int i = 0; i < objectNum; i++) {
+			transAndRotateFruits(gl2,glu,glut,i);
 		}
-
+		for (int i = 0; i < letterNum; i++) {
+			transAndRotateLetters(gl2,glu,glut,i);
+		}
 		if (time < introTime) {
 			//System.out.println(time);
 			time += 1.0f / fps;
