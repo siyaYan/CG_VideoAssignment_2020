@@ -2,7 +2,7 @@
 
 # Overall:
 
-A program for Youtube () channel introduction video,which contains a Scene that watermelons,oranges,apples can randomly falling down with music.
+A program for Youtube (Ninja) channel introduction video,which contains a Scene that watermelons,oranges,apples can randomly falling down with music.
 
 # Functions:
 
@@ -11,6 +11,7 @@ A program for Youtube () channel introduction video,which contains a Scene that 
 + create watermelons,oranges,and apples.(Blender)
 + create channel letters.(Blender)
 + import blender object into OpenGl.
++ draw blender object by OpenGl.
 + various objects falling down in different ways.
 + channel letters fall down and then suspend in the midair.
 
@@ -45,8 +46,9 @@ A program for Youtube () channel introduction video,which contains a Scene that 
 7.  design the translation/rotation function for objects.
 8.  design the play music function.
 10. import the objects build in Blender
-11.  Test every unit functions, fix the bugs.
-12.  Test the whole program.
+11. design the objects drawing function.
+12.  Test every unit functions, fix the bugs.
+13.  Test the whole program.
 
 # Test:(add more testing plan)
 
@@ -63,5 +65,7 @@ A program for Youtube () channel introduction video,which contains a Scene that 
 
     +   run the program several times to test the randomly parameters and different outcomes
 
-
+# Notice:
++   if you can't use the makefile(written jogl jar in our path), use makefile_original((original_path) alternatively!
+ Because don't know the makefile testing will use jogl in our file path or not.
 
