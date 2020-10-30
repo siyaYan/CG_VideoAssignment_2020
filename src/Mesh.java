@@ -6,6 +6,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+
+/**
+ * Mesh - Helper class cfor importing OBJ's
+ *
+ * @auther: Jaryd Sartori
+ * @uid: u5799628
+ * Imports .obj files from blender (requires triangles and not rects) and converts data from blender coordinate system to OpenGL 
+ * Coordinate system
+ */
+
+
+
+
 public class Mesh {
 
 

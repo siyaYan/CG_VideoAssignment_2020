@@ -89,19 +89,6 @@ public class CGIntro implements GLEventListener {
 
 
 
-
-//	drawObj(gl2,glu,glut,, -2.0f);
-//	drawObj(gl2,glu,glut,, -1.6f);
-//	drawObj(gl2,glu,glut,, -1.2f);
-//	drawObj(gl2,glu,glut,, -0.8f);
-//	drawObj(gl2,glu,glut,"letters/a.obj", -0.4f);
-//	drawObj(gl2,glu,glut,"letters/P.obj", -0.0f);
-//	drawObj(gl2,glu,glut,"letters/o.obj", 0.4f);
-//	drawObj(gl2,glu,glut,"letters/r.obj", 0.8f);
-//	drawObj(gl2,glu,glut,"letters/i-2.obj", 1.2f);
-//	drawObj(gl2,glu,glut,"letters/u.obj", 1.6f);
-//	drawObj(gl2,glu,glut,"letters/m.obj", 2.0f);
-
 	String appleOBJ = "src/OBJs/AppleTri.obj";
 	String appleMTL = "src/OBJs/AppleTri.mtl";
 	String orangeOBJ = "src/OBJs/OrangeTri.obj";
@@ -336,11 +323,7 @@ public class CGIntro implements GLEventListener {
 		}
 
 		gl2.glScaled(scale,scale,scale);
-//		drawObj(gl2,glu,glut,appleOBJ, 0.0f);
-//		drawObj(gl2,glu,glut,orangeOBJ, 0.0f);
-//		drawObj(gl2,glu,glut,watermelonOBJ, 0.0f);
-		drawSomething(gl2,glu,glut);
-//		drawSomething(gl2,glu,glut);
+
 		drawObj(gl2, glu, glut, letterFileName[num], 0.0f);
 
 
@@ -412,7 +395,7 @@ public class CGIntro implements GLEventListener {
 	}
 	
 	/**
-	 * drawObj
+	 * drawObj - uses vector data and triangle indicies to map textures and verticies to buffer for displaying .obj imported objects.
 	 * @auther:Jaryd Sartori
 	 * @uid: u5799628
 	 */
@@ -511,7 +494,7 @@ public class CGIntro implements GLEventListener {
 		for (int j = 0; j < letterNum; j++) {
 			randomLetters(j);
 		}
-		jf = new JFrame("CG Intro");
+		jf = new JFrame("Falling Fruits");
 		profile = GLProfile.getDefault();
 		caps = new GLCapabilities(profile);
 		gljpanel = new GLJPanel();
@@ -603,7 +586,7 @@ public class CGIntro implements GLEventListener {
 		for (int i = 0; i < letterNum; i++) {
 			transAndRotateLetters(gl2,glu,glut,i);
 		}
-		drawObj(gl2,glu,glut,"letters/n-1.obj", -2.0f);
+
 		
 		
 		
