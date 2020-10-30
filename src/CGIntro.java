@@ -44,7 +44,7 @@ public class CGIntro implements GLEventListener {
 	float lightpos[] = { 2f, 2f, 30f, 1.0f };
 	//size 40*40 pos(0,0,-15)
 	float background[] = { 40.0f, 40.0f, -15.0f };
-	Texture cgtexture;
+	Texture backgroundtexture;
 	Texture object;
 	Texture test;
 	Texture ninjatextures;
@@ -66,8 +66,11 @@ public class CGIntro implements GLEventListener {
 	float zSpeed=6;
 	float rotateSpeed=5;
 
+	//	File list for letters
+	String letterFileName[] = {"src/letters/n-1.obj", "src/letters/i-1.obj", "src/letters/n-2.obj", "src/letters/j.obj", "src/letters/a.obj", "src/letters/p.obj",
+			"src/letters/o.obj","src/letters/r.obj","src/letters/i-2.obj","src/letters/u.obj","src/letters/m.obj"};
 	//number of letters
-	int letterNum=11;
+	int letterNum= letterFileName.length;
 	//parameters for letters
 	int[] speedLetter=new int[letterNum];//0,1(2 types: nomal/fast)
 	int[] startTimeLetter=new int[letterNum];//0-2(3 types)
@@ -80,14 +83,6 @@ public class CGIntro implements GLEventListener {
 	//for shadow
 	float groundShadow[] = { 0.0f, 0.0f, -5.0f };
 	float groundnormal[] = { 0.0f, 0.0f, -10.0f };
-
-
-
-//	File list for letters
-	String letterFileName[] = {"src/letters/n-1.obj", "src/letters/i-1.obj", "src/letters/n-2.obj", "src/letters/j.obj", "src/letters/a.obj", "src/letters/p.obj",
-			"src/letters/o.obj","src/letters/r.obj","src/letters/i-2.obj","src/letters/u.obj","src/letters/m.obj"};
-
-
 
 	String appleOBJ = "src/OBJs/AppleTri.obj";
 	String appleMTL = "src/OBJs/AppleTri.mtl";
@@ -285,7 +280,7 @@ public class CGIntro implements GLEventListener {
 		gl2.glColor3d(rgb[0],rgb[1],rgb[2]);
 		projectShadow(gl2, groundShadow, groundnormal, lightpos);
 		//gl2.glColor3d(1,0,0);
-		drawShadow(gl2,glu,glut);
+		//drawShadow(gl2,glu,glut);
 		gl2.glPopMatrix();
 		gl2.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
 		gl2.glEnable(GL2.GL_LIGHTING);
@@ -326,7 +321,6 @@ public class CGIntro implements GLEventListener {
 
 		drawObj(gl2, glu, glut, letterFileName[num], 0.0f);
 
-
 		gl2.glPopMatrix();
 
 		gl2.glPushMatrix();
@@ -347,7 +341,7 @@ public class CGIntro implements GLEventListener {
 		gl2.glColor3d(rgb[0],rgb[1],rgb[2]);
 		projectShadow(gl2, groundShadow, groundnormal, lightpos);
 		//gl2.glColor3d(1,0,0);
-		drawShadow(gl2,glu,glut);
+		drawLetterShadow(gl2, glu, glut, letterFileName[num]);
 		gl2.glPopMatrix();
 		gl2.glDisable(GL2.GL_POLYGON_OFFSET_FILL);
 		gl2.glEnable(GL2.GL_LIGHTING);
@@ -435,7 +429,6 @@ public class CGIntro implements GLEventListener {
 		gl2.glDisable(GL2.GL_TEXTURE_2D);
 		gl2.glEnd();
 		gl2.glPopMatrix();
-		
 	}
 
 	/**
@@ -443,7 +436,7 @@ public class CGIntro implements GLEventListener {
 	 * @auther: Xiran Yan(Siya)
 	 * @uid: u7167582
 	 */
-	public void drawShadow(GL2 gl2, GLU glu, GLUT glut) {
+/*	public void drawShadow(GL2 gl2, GLU glu, GLUT glut) {
 		object.disable(gl2);
 		gl2.glPushMatrix();
 		GLUquadric sphere=glu.gluNewQuadric();
@@ -453,6 +446,40 @@ public class CGIntro implements GLEventListener {
 		glu.gluSphere(sphere,0.5,50,50);
 		gl2.glPopMatrix();
 		object.enable(gl2);
+	}*/
+
+	/**
+	 * disable bind and draw letters shadow
+	 * @auther: Xiran Yan(Siya)
+	 * @uid: u7167582
+	 */
+	public void drawLetterShadow(GL2 gl2, GLU glu, GLUT glut,String file) {
+		ninjatextures.disable(gl2);
+		gl2.glPushMatrix();
+		gl2.glScalef(2.0f, 2.0f, 2.0f);
+
+		Vector<float[]> verts = new Vector<float[]>();
+		Vector<float[]> uvs = new Vector<float[]>();
+		Vector<float[]> norms = new Vector<float[]>();
+
+		Mesh.loadObjModel(file, verts, uvs, norms);
+		gl2.glBegin(GL2.GL_TRIANGLES);
+		for (int i = 0; i < verts.size(); i++) {
+			if(i%3 == 0) {
+//				first vertex normal, vertex, uv
+				gl2.glNormal3f(norms.get(i)[0], norms.get(i)[1], norms.get(i)[2]);
+				gl2.glVertex3f(verts.get(i)[0], verts.get(i)[1], verts.get(i)[2]);
+//				second vertex normal, vertex, uv
+				gl2.glNormal3f(norms.get(i+1)[0], norms.get(i+1)[1], norms.get(i+1)[2]);
+				gl2.glVertex3f(verts.get(i+1)[0], verts.get(i+1)[1], verts.get(i+1)[2]);
+//				third vertex: normal, vertex, uv
+				gl2.glNormal3f(norms.get(i+2)[0], norms.get(i+2)[1], norms.get(i+2)[2]);
+				gl2.glVertex3f(verts.get(i+2)[0], verts.get(i+2)[1], verts.get(i+2)[2]);
+			}
+		}
+		gl2.glEnd();
+		gl2.glPopMatrix();
+		ninjatextures.enable(gl2);
 	}
 
 	/**
@@ -463,7 +490,7 @@ public class CGIntro implements GLEventListener {
 	 */
 	public void drawBackground(GL2 gl2, GLU glu, GLUT glut) {
 		gl2.glPushMatrix();
-		cgtexture.bind(gl2);
+		backgroundtexture.bind(gl2);
 		gl2.glEnable(GL2.GL_TEXTURE_2D);
 		gl2.glBegin(GL2.GL_POLYGON);
 		gl2.glVertex3d(-(background[0]/2), -(background[1]/2), background[2]);
@@ -548,15 +575,13 @@ public class CGIntro implements GLEventListener {
 		gl2.glEnable(GL2.GL_LIGHT2);
 
 		try {
-			cgtexture = TextureIO.newTexture(new File("src/images/backgound.jpg"), true);
+			backgroundtexture = TextureIO.newTexture(new File("src/images/backgound.jpg"), true);
 			object = TextureIO.newTexture(new File("src/images/strawberry_2.jpg"), true);
-			test = TextureIO.newTexture(new File("src/images/background4.jpg"), true);
 			ninjatextures = TextureIO.newTexture(new File("src/images/ninjatextures.jpeg"), true);
-			test.enable(gl2);
+
 			object.enable(gl2);
-			cgtexture.enable(gl2);
+			backgroundtexture.enable(gl2);
 			ninjatextures.enable(gl2);
-			//cgtextureAspect = ((float) cgtexture.getImageWidth()) / cgtexture.getImageHeight();
 		} catch (GLException | IOException e) {
 			e.printStackTrace();
 		}
