@@ -67,6 +67,7 @@ public class CGIntro implements GLEventListener {
 
 	float[] startPosLetter={-6.25f,-5f,-3.75f,-2.5f,-1.25f,0f,1.25f,2.5f,3.75f,5f,6.25f};//11 letter in x axis
 	float stopPos=4;//letters stop position(screen can see 10 to -10 in both x & y axis)
+	float rotateLetters=4;//rotate times for letters
 
 	float lightpos[] = { 2f, 2f, 30f, 1.0f };
 	//size 40*40 pos(0,0,-15)
@@ -239,7 +240,7 @@ public class CGIntro implements GLEventListener {
 		else {
 			gl2.glTranslatef(startposx[num]+(speedLeftOrRight*directx[num]), (10.0f)-(speedDown), startposz[num]+(speedBackOrFront*directz[num]));
 		}
-		//every second rotate 90
+		//every rotateSpeed *(time / introTime) rotate half_circle
 		gl2.glRotatef(180.0f * (speedRotate), 1.0f*rotate[num], 1.0f*rotate[num+1], 1.0f*rotate[num+2]);
 		gl2.glScaled(scale,scale,scale);
 		drawSphere(gl2,glu,glut);
@@ -284,15 +285,21 @@ public class CGIntro implements GLEventListener {
 		//falling down speed(20,30)-starttime(0-3)
 		float speedDown = (speedLetter[num]*10+20)*(time / introTime)-startTimeLetter[num];//falling down routine
 		float position = 10f-speedDown;//position now
+		float rotation = rotateLetters*(time / introTime);//rotate letters
+
 		gl2.glPushMatrix();
 		//if it's not your turn stay in the pos (0,20,0)
 		if (speedDown < 0) {
 			gl2.glTranslatef(0,20,0.0f);
 		} else if (position>stopPos) {
 			gl2.glTranslatef(startPosLetter[num], (10.0f) - (speedDown), 0);
+			//every second rotate 360 with z axis
+			gl2.glRotatef(360.0f * (rotation), 0f, 1f, 0f);
 		} else {
-			gl2.glTranslatef(startPosLetter[num], stopPos, 0);
+			gl2.glTranslatef(startPosLetter[num], stopPos, 0);//every second rotate 180 with z axis
+			//gl2.glRotatef(180.0f * (rotation), 0f, 1f, 0f);
 		}
+
 		gl2.glScaled(scale,scale,scale);
 		drawSomething(gl2,glu,glut);
 		gl2.glPopMatrix();
