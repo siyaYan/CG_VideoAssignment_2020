@@ -244,7 +244,7 @@ public class CGIntro implements GLEventListener {
 	 * @uid: u7167582
 	 */
 	public void transAndRotateFruits(GL2 gl2,GLU glu, GLUT glut,int num) {
-		float scale = 1f;
+		float scale = 0.8f;
 		//falling down speed(10,20,30)-starttime(0-9)
 		float speedDown = (speed[num]*10+20)*(time / introTime)-starttime[num];
 		//speed for rotate and to left or right is default
@@ -364,7 +364,7 @@ public class CGIntro implements GLEventListener {
 	 */
 	public void drawFruits(GL2 gl2, GLU glu, GLUT glut, String file, float xOffset) {
 		gl2.glPushMatrix();
-		gl2.glScalef(2.0f, 2.0f, 2.0f);
+		gl2.glScalef(0.5f, 0.5f, 0.5f);
 //		xOffset aligns each letter consecutively based off manual refinement
 		gl2.glTranslatef(xOffset, 0.0f, 0.0f);
 	
@@ -374,11 +374,7 @@ public class CGIntro implements GLEventListener {
 		System.out.println(file.split("/")[1]);
 		Mesh.loadObjModel(file, verts, uvs, norms);
 		fruittextures.bind(gl2);
-		
 
-
-		
-		
 		gl2.glEnable(GL2.GL_TEXTURE_2D);
 		gl2.glBegin(GL2.GL_TRIANGLES);
 		for (int i = 0; i < verts.size(); i++) {
